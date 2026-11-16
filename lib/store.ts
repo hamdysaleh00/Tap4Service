@@ -4,7 +4,8 @@ import { staffView, guestView, applyCommand } from './domain.mjs';
 import { createNormalizedStore } from './normalized-store.mjs';
 import { classifyHostname, ensureRestaurantSlugs, enforceScope, scopeState, RoutingError } from './tenant-routing.mjs';
 import { publicView } from './tenant-views.mjs';
-import type { TenantScope } from './tenant-context';
+import { currentTenantScope,type TenantScope } from './tenant-context';
+import { createUpdatesRepository } from './updates-repository.mjs';
 import { designState } from './restaurant-designs/config.mjs';
 import { DESIGN_CATALOG } from './restaurant-designs/catalog.mjs';
 type StaffIdentity={id:string;email:string;name?:string;authProvider?:string;isSuperAdmin?:boolean};
@@ -18,13 +19,31 @@ function normalized() {
  return createNormalizedStore(env.DB!);
 }
 export async function resolveScope(request:Request):Promise<TenantScope> {
+ const cached=currentTenantScope();if(cached?.origin===new URL(request.url).origin)return cached;
  const scope={...classifyHostname(request.url,env),origin:new URL(request.url).origin};
  if(scope.kind!=='tenant')return scope;
  const store=normalized();
- const current=store?null:await readState();
- const restaurant=store?await store.findRestaurant(scope.slug):current&&ensureRestaurantSlugs(current.state).restaurants.find((t:{slug:string})=>t.slug===scope.slug);
+ let restaurant;
+ if(store)restaurant=await store.findRestaurant(scope.slug);
+ else{
+  const matches=await env.DB!.prepare("SELECT json_extract(r.value,'$.id') id FROM app_state a,json_each(a.payload,'$.restaurants') r WHERE a.id='main' AND json_extract(r.value,'$.slug')=? LIMIT 2").bind(scope.slug).all<{id:string}>();
+  if(matches.results.length>1)throw new RoutingError('Duplicate restaurant slug. Contact the platform administrator.',503);
+  restaurant=matches.results[0];
+  // Compatibility only for pre-slug exports. Normal polling never reads payload.
+  if(!restaurant){const legacy=await env.DB!.prepare("SELECT 1 found FROM app_state a,json_each(a.payload,'$.restaurants') r WHERE a.id='main' AND json_extract(r.value,'$.slug') IS NULL LIMIT 1").first();if(legacy){const current=await readState();restaurant=current&&ensureRestaurantSlugs(current.state).restaurants.find((t:{slug:string})=>t.slug===scope.slug);}}
+ }
  if(!restaurant)throw new RoutingError();
  return {...scope,restaurantId:restaurant.id};
+}
+export async function loadUpdates(user:StaffIdentity|null,input:{restaurantId:string|null;token:string|null;capability:string|null;view:string|null;cursor:string|null;etag:string|null},scope:TenantScope){
+ const repository=createUpdatesRepository(env.DB!,{backend:normalized()?'normalized':'legacy'});
+ let result=await repository.read({...input,user,scope});
+ if(result.needsInitialize){
+  if(input.token)throw new AppError('Restaurant setup is not complete.',503);
+  await loadStaff(user,input.restaurantId,scope);
+  result=await repository.read({...input,user,scope});
+ }
+ return result;
 }
 export async function loadPublicRestaurant(scope:TenantScope) {
  const store=normalized();if(store)return store.publicRestaurant(scope);
