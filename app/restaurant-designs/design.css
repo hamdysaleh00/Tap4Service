@@ -1,0 +1,29 @@
+.restaurant-design{--green:var(--design-primary);--ink:var(--design-text);--muted:var(--design-muted);--soft:var(--design-bg);background:var(--design-bg);color:var(--design-text);font-family:var(--design-body);min-height:100vh;background-size:cover;background-attachment:fixed;overflow-wrap:anywhere}
+.restaurant-design[lang] h1,.restaurant-design[lang] h2,.restaurant-design[lang] h3,.restaurant-design[lang] .guest-brand strong{font-family:var(--design-heading)}
+.restaurant-design .guest-table{border-color:var(--design-accent)}
+.restaurant-design .design-category>h2{border-inline-start:4px solid var(--design-accent);padding-inline-start:12px}
+.restaurant-design .guest-app{background:transparent;color:var(--design-text)}
+.restaurant-design .guest-header,.restaurant-design .guest-nav,.restaurant-design .dish,.restaurant-design .guest-bill,.restaurant-design .modal,.restaurant-design .guest-session-note{background:var(--design-surface);color:var(--design-text)}
+.restaurant-design .guest-hero{background:var(--design-surface);color:var(--design-text)}
+.restaurant-design .guest-hero h1,.restaurant-design .dish h3{color:var(--design-text)}
+.restaurant-design .button.primary,.restaurant-design .add-dish,.restaurant-design .basket-float,.restaurant-design .guest-categories .active{background:var(--design-primary);color:var(--design-on-primary)}
+.restaurant-design .guest-hero p,.restaurant-design .dish-content p,.restaurant-design .guest-footer{color:var(--design-muted)}
+.restaurant-design .design-hero>div:first-child{padding:clamp(24px,5vw,56px)}
+.restaurant-design .design-hero h1{font-size:clamp(28px,6vw,60px);line-height:1.2}
+.restaurant-design .design-hero .hero-image img{width:100%;height:100%;object-fit:cover}
+.design-site{max-width:1200px;margin-inline:auto;padding:20px 16px 56px}
+.design-site-header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-block-end:28px}
+.design-site-header .guest-brand{margin-inline-end:auto}
+.design-site-header a{color:inherit}.design-site-header img{width:44px;height:44px;object-fit:contain}
+.design-site .guest-menu-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.design-category{margin-block:36px}.design-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-block:24px}.design-gallery img{width:100%;height:180px;object-fit:cover;border-radius:12px}
+.restaurant-design[data-menu-style=list] .guest-menu-grid{grid-template-columns:1fr}
+.restaurant-design[data-menu-style=list] .dish{display:flex;align-items:center;min-width:0}
+.restaurant-design[data-menu-style=list] .dish-image{width:30%;height:150px;flex-shrink:0}
+.restaurant-design[data-menu-style=list] .dish-content{flex:1;min-width:0}
+.restaurant-design .dish-content>div{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.design-preview-note{padding:12px 20px;background:#202b26;color:white;position:sticky;inset-block-start:0;z-index:60;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.design-editor{border-block-start:1px solid #dce2dc;margin-block-start:24px;padding-block-start:24px;display:grid;gap:16px}.design-editor label{display:grid;gap:6px}.design-editor input,.design-editor select,.design-editor textarea{width:100%;min-width:0}.design-editor-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}.design-editor iframe{width:100%;height:650px;border:1px solid #ccd4cd;border-radius:12px;background:white}.design-editor .design-mobile-preview{max-width:390px;margin-inline:auto;display:block}.design-color-fields{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}.design-editor-actions{display:flex;flex-wrap:wrap;gap:10px}.design-editor-message{padding:12px;border:1px solid #ccd4cd;border-radius:8px}.design-editor textarea{min-height:70px}.design-check{display:flex!important;align-items:center}.design-check input{width:auto!important}
+@media(min-width:640px){.design-site .guest-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.design-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.design-color-fields{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1000px){.design-site .guest-menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.restaurant-design .guest-hero{grid-template-columns:1fr}.restaurant-design .guest-hero .hero-image{max-height:200px}.restaurant-design .guest-header{height:auto;min-height:68px;gap:10px;flex-wrap:wrap;padding-block:12px}}
