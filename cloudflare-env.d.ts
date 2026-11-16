@@ -2,6 +2,12 @@ declare namespace Cloudflare {
   interface Env {
     DB?: D1Database;
     TAP2SERVE_STORAGE?: 'legacy' | 'normalized';
+    TAP2SERVE_PRODUCTION?: string;
+    TAP2SERVE_MAINTENANCE?: string;
+    PUBLIC_READ_LIMITER?: RateLimit;
+    GUEST_WRITE_LIMITER?: RateLimit;
+    OPS_ALERT_WEBHOOK_URL?: string;
+    OPS_ALERT_TOKEN?: string;
     TAP2SERVE_AUTH?: 'sites' | 'independent';
     AUTH_RATE_LIMIT_SECRET?: string;
     AUTH_MFA_KEY?: string;

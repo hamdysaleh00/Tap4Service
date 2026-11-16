@@ -62,6 +62,9 @@ export default defineConfig(async ({ command }) => {
         config: {
           ...localBindingConfig,
           assets: { run_worker_first: true },
+          // Automatic invocation logs can include QR tokens in request URLs.
+          // Application logs use an explicit, redacted field whitelist instead.
+          observability: { enabled: true, head_sampling_rate: 1, logs: { enabled: true, invocation_logs: false } },
           // Local compatibility is opt-in and never emitted into production.
           ...(command === 'serve' ? { vars: { TAP2SERVE_LOCAL_DEV: 'true' } } : {}),
           ...(command === "serve"
