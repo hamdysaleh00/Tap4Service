@@ -1,5 +1,6 @@
 'use client';
 import { LanguageSwitcher, useI18n } from '../i18n';
+import Link from 'next/link';
 import type { DesignProps, GuestLayoutProps, CardProps } from './types';
 export function ClassicShell({header,content,navigation,floating,overlays}:GuestLayoutProps){return <div className="guest-app">{header}{content}{floating}{navigation}{overlays}</div>;}
 export function ClassicHero({restaurant,config}:DesignProps){
@@ -18,7 +19,7 @@ export function ClassicMenuCard({restaurant,config,item,children}:CardProps){
 export function ClassicSite({restaurant,config}:DesignProps){
  const {content,t,language}=useI18n();
  return <main className="design-site">
-  <header className="design-site-header"><a href="/" className="guest-brand">{config.branding.logoUrl&&<img src={config.branding.logoUrl} alt=""/>}<strong>{content(restaurant)}</strong></a><LanguageSwitcher/><a href="/dashboard">{t('Staff dashboard')}</a></header>
+  <header className="design-site-header"><Link href="/" className="guest-brand">{config.branding.logoUrl&&<img src={config.branding.logoUrl} alt=""/>}<strong>{content(restaurant)}</strong></Link><LanguageSwitcher/><a href="/dashboard">{t('Staff dashboard')}</a></header>
   <ClassicHero restaurant={restaurant} config={config}/>
   <p>{t('Scan or tap your table’s QR / NFC stand to order.')}</p>
   {config.components.showGallery&&config.branding.gallery.length>0&&<section className="design-gallery" aria-label={t('Restaurant gallery')}>{config.branding.gallery.map((url,index)=><img key={`${url}-${index}`} src={url} alt={`${content(restaurant)} ${index+1}`} loading="lazy"/>)}</section>}

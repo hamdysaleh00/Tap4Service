@@ -13,5 +13,6 @@ for(const backend of ['legacy','normalized'])test(`${backend} built Worker: cond
   const guest=await f.read('/api/updates?table='+table.token+'&session='+s.capability);assert.equal(guest.status,200);const body=await guest.json();assert.equal(body.orders.length,2);assert.equal(body.bill.total,73500);assert(!body.restaurant.members);
   const unknown=await f.mf.dispatchFetch('http://localhost/api/updates?restaurant='+t.id);assert.equal(unknown.status,401);
   const o=changedData.restaurant.orders.find(o=>o.id===id);const acknowledge=await f.command('order.status',{orderId:id,version:o.version,status:'ACCEPTED'});assert.equal(acknowledge.status,200);const accepted=await (await f.read(url)).json();assert(accepted.restaurant.orders.some(o=>o.id===id&&o.status==='ACCEPTED'));
+  const platform=await f.read(url+'&view=platform');assert.equal(platform.status,200);const platformData=await platform.json();assert.equal(platformData.restaurant.id,t.id);assert(platformData.permissions.includes('billing.read'));assert.equal(platformData.platformRestaurants.length,3);assert(platformData.restaurant.notifications.some(n=>n.orderId===id));
  }finally{await f.mf.dispose();}
 });

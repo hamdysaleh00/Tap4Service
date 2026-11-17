@@ -21,6 +21,18 @@ function fixture(backend='legacy',state=createInitialState(owner)){
  return {backend,db,repository,adapter,state,t,scope,read,command};
 }
 for(const backend of ['legacy','normalized']){
+ test(`${backend}: local platform view retains authorized restaurant navigation and notifications`,async()=>{
+  const state=createInitialState(owner),other=createRestaurant('Other platform venue');other.members.push({...state.restaurants[0].members[0],id:key()});state.restaurants.push(other);
+  const f=fixture(backend,state),scope={kind:'local',base:'localhost',origin:'http://localhost'},read=extra=>f.repository.read({user:owner,restaurantId:f.t.id,scope,view:'platform',...extra});
+  try{
+   await f.command('guest.call',{token:f.t.tables[0].token,capability:f.t.sessions[0].capability});
+   const first=await read();assert.equal(first.data.restaurant.id,f.t.id);assert(first.data.permissions.includes('billing.read'));assert(first.data.restaurant.notifications.some(n=>n.kind==='waiter_called'));assert.equal(first.data.platformRestaurants.length,2);assert.equal(first.data.sync.view,'platform');
+   assert((await read({etag:first.etag})).unchanged);
+   await f.command('settings.save',{restaurantId:other.id,name:'Other venue updated',taxBps:0,serviceBps:0});const next=await read({etag:first.etag});assert(!next.unchanged);assert(next.data.platformRestaurants.some(t=>t.name==='Other venue updated'));assert.equal(next.data.restaurant.id,f.t.id);
+   const back=await f.repository.read({user:owner,restaurantId:f.t.id,scope,view:'live'});assert.equal(back.data.restaurant.id,f.t.id);assert(back.data.permissions.includes('billing.read'));
+   await assert.rejects(read({user:{id:'outsider',email:'outsider@example.test'}}),e=>e.status===403);
+  }finally{f.db.close();}
+ });
  test(`${backend}: settings persist live rates, invalidate guest polls and preserve finalized bill history`,async()=>{
   const f=fixture(backend),s=f.t.sessions[0],table=f.t.tables[0];
   try{

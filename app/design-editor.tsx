@@ -1,20 +1,22 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from './i18n';
 import { validateDesign } from '../lib/restaurant-designs/config.mjs';
 import { DEFAULT_CONFIG } from '../lib/restaurant-designs/config.mjs';
 import type { DesignConfig } from './restaurant-designs/types';
 type Management={version:number;draft:DesignConfig;published:DesignConfig;previous:DesignConfig|null;publishedAt:string|null};
 type DesignReply={management:Management;catalog:{id:string;name:string;description:string}[]};
+async function fetchDesign(restaurantId:string,signal?:AbortSignal){
+ const response=await fetch(`/api/design?restaurant=${encodeURIComponent(restaurantId)}`,{cache:'no-store',signal});const result=await response.json() as DesignReply&{error?:string};
+ if(!response.ok)throw new Error(result.error);return result;
+}
 export default function DesignEditor({restaurantId,command}:{restaurantId:string;command:(action:string,body:object,message?:string)=>Promise<unknown>}){
  const {t,language,error:translateError}=useI18n();
  const [data,setData]=useState<DesignReply|null>(null),[draft,setDraft]=useState<DesignConfig>(structuredClone(DEFAULT_CONFIG));
  const [dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[open,setOpen]=useState(false),[preview,setPreview]=useState<number|null>(null),[size,setSize]=useState('mobile'),[previewLanguage,setPreviewLanguage]=useState('en'),[optionsText,setOptionsText]=useState('{}'),[previewView,setPreviewView]=useState('site');
- async function read(signal?:AbortSignal){
-  const response=await fetch(`/api/design?restaurant=${encodeURIComponent(restaurantId)}`,{cache:'no-store',signal});const result=await response.json() as DesignReply&{error?:string};
-  if(!response.ok)throw new Error(result.error);setData(result);setDraft(result.management.draft);setOptionsText(JSON.stringify(result.management.draft.options,null,2));setDirty(false);setPreview(null);
- }
- useEffect(()=>{if(!open)return;const controller=new AbortController();read(controller.signal).catch(error=>{if(!controller.signal.aborted)setMessage(error.message);});return()=>controller.abort();},[open,restaurantId]);
+ const acceptDesign=useCallback((result:DesignReply)=>{setData(result);setDraft(result.management.draft);setOptionsText(JSON.stringify(result.management.draft.options,null,2));setDirty(false);setPreview(null);},[]);
+ async function read(){acceptDesign(await fetchDesign(restaurantId));}
+ useEffect(()=>{if(!open)return;const controller=new AbortController();void fetchDesign(restaurantId,controller.signal).then(result=>{if(!controller.signal.aborted)acceptDesign(result);}).catch(error=>{if(!controller.signal.aborted)setMessage(error.message);});return()=>controller.abort();},[open,restaurantId,acceptDesign]);
  function change(next:DesignConfig){setDraft(next);setDirty(true);setPreview(null);setMessage('');}
  async function mutate(action:string){
   if(!data||busy)return;setBusy(true);setMessage('');

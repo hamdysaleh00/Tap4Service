@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes } from 'node:crypto';
-import { mkdtemp,writeFile,readFile,mkdir,rm } from 'node:fs/promises';
+import { mkdtemp,writeFile,readFile,rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { createInitialState } from '../lib/domain.mjs';
@@ -11,8 +12,10 @@ import { migrationPlan } from '../lib/normalized-migration.mjs';
 import { applyPlan } from '../scripts/normalized-migration.mjs';
 import { exportSql } from '../lib/backup.mjs';
 test('offline backup CLI rehearses/prepares a recovery artifact that restores into an isolated real D1 database',async()=>{
- const workspace=path.resolve('outputs');await mkdir(workspace,{recursive:true});const directory=await mkdtemp(path.join(workspace,'d1-recovery-'));
- // Every file/recursive cleanup target is resolved and constrained to outputs.
+ // workerd's SQLite file names can exceed Windows' path limit in deeply nested
+ // worktrees. Keep this disposable local D1 drill under a short unique temp root.
+ const workspace=path.resolve(tmpdir()),directory=await mkdtemp(path.join(workspace,'tab2serve-d1-recovery-'));
+ // Every recursive cleanup target is resolved and constrained to this temp root.
  assert(directory.startsWith(workspace+path.sep));
  try{
   const state=createInitialState({id:'drill-owner',email:'drill@example.test'});state.restaurants[0].menu[0].description='مرحبا; preserved\nsecond line';

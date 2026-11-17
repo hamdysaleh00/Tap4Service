@@ -105,24 +105,58 @@ tenant routing remain active.
 | Check | Result |
 | --- | --- |
 | Notification unit/repository tests | **PASS** 8/8, legacy and normalized SQLite/D1 adapter |
-| Complete `tests/*.test.mjs` suite | **FAIL** 157/158 pass; existing isolated backup restore fails locally with workerd `SQLITE_CANTOPEN` |
+| Complete `tests/*.test.mjs` suite | **PASS** 163/163, including actual local D1 backup restoration, language storage and local platform navigation |
 | Notification built Worker/D1 integration | **PASS** 2/2, both storage modes |
 | Existing built Worker regressions | **PASS** 15/15: updates, billing, tenant routing, independent authentication, normalized storage and production-mode security |
 | Local lifecycle race integration | **PASS** against the isolated local D1 server |
 | Two-device notification browser integration | **PASS** actual Chromium, explicit native audio unlock, dedupe, mute, fallback, offline recovery, order navigation, receipts, mobile and Arabic |
 | Existing alpha browser acceptance | **PASS** English and Arabic: guest ordering/editing, kitchen, service, feedback, management, printing, payments, closure, Split Bill and charge calculations |
+| Existing lifecycle browser acceptance | **PASS** English and Arabic: reopening, finalization, stale reviews, permanent QR, old balances, history and calculator cleanup |
+| Existing design editor browser regression | **PASS** local authenticated save/preview/publish/revert/reopen; business records and notifications unchanged |
 | TypeScript | **PASS** `npm.cmd run typecheck` |
 | Build | **PASS** `npm.cmd run build`, Workers server bundle generated |
 | New notification source/test lint | **PASS**, no errors or warnings |
-| Full-project lint | **FAIL**, 10 existing errors and 134 warnings; errors remain in `design-editor.tsx`, `i18n.tsx`, `restaurant-designs/classic.tsx`, `tab2serve.tsx` |
+| Full-project lint | **PASS** exit 0, no errors, 133 warnings; one documented local compatibility exemption for the existing workspace `Any` alias |
 | Whitespace validation | **PASS** `git diff --check` |
 | Hosted Cloudflare/physical-device audio | **NOT RUN**, local runtime/browser verification only |
 | Other worktrees' POS/Design Studio changes | **NOT TESTED**, not integrated into this branch |
 
-The backup test failure reproduces when run alone; it is an actual failing check,
-not a passing backup rehearsal. The generated schema test initially encountered
-Windows checkout CRLF differences; local generated artifacts were normalized to
-their existing LF generator output, with no schema changes.
+The original notification commit recorded a reproducible local backup-test
+failure. Follow-up investigation fixed it by moving disposable D1 recovery files
+to a short, uniquely created OS temp directory: the nested Windows worktree path
+made workerd's SQLite filenames too long. The drill now restores and verifies
+actual D1 data, rotated guest capabilities and revoked authentication records.
+Cleanup remains constrained to the generated test directory. The generated
+schema comparison now normalizes CRLF to LF before comparing exact contents, so
+a fresh Windows checkout does not require rewriting schema artifacts. No schema
+or production backup behavior changed.
+
+Follow-up lint work replaces language hydration state effects with an external
+browser preference store and typed localization context. Persisted preferences,
+identity changes, cross-tab updates, blocked storage and server snapshots have
+unit coverage. Browser readiness and table-token hydration also use stable server
+snapshots; guest session closure resets transient UI before committing a stale
+calculator/dialog. The existing design editor now applies results from the fetch
+completion callback and ignores aborted reads. The site home link uses framework
+navigation. The workspace's large pre-existing dynamic props/forms boundary still
+uses `Any`, with a single inline lint exemption and an explicit explanation;
+this is retained type debt, not a claim that all workspace wire contracts are
+fully typed. Lint rules are not relaxed globally.
+
+Expanded acceptance also exposed a pre-existing local platform-navigation race:
+the next platform poll replaced the selected restaurant with `null`, unmounting
+the navigation needed to return to Billing. Local platform snapshots now reload
+the authorized restaurant and current permissions alongside platform summaries
+and notifications. They do not reuse stale client permissions. Repository tests
+cover both storage modes, unchanged polls, unrelated restaurant revisions and
+unauthorized reads; built Worker and browser regressions cover navigation back.
+Dedicated admin-host responses and tenant-host restrictions are unchanged.
+
+The design editor browser test selects the existing SuperAdmin component using
+the real local platform snapshot with a fixture routing label. All design API
+calls and previews use the actual authenticated local backend. This exercises
+the baseline editor on this branch, not the other worktree's Design Studio;
+hostname authorization is verified separately in the Worker suites.
 
 Browser testing also exposed the baseline development asset routing bug:
 `run_worker_first: true` intercepted Vite's browser modules and styles with HTML
@@ -138,6 +172,8 @@ to `http://127.0.0.1:5194`. Supply `PLAYWRIGHT_MODULE` and `BROWSER_EXECUTABLE` 
 Playwright or Chromium are provided outside project dependencies. Existing alpha
 acceptance accepts the same environment variables. Test fixtures reject remote
 base URLs. Machine-local logs and screenshots are under ignored `outputs/`.
+The additional browser checks are `node tests/session-lifecycle.ui.local.mjs`
+and `node tests/design-editor.ui.local.mjs` with the same local environment.
 
 ## Operational limits
 
