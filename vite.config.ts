@@ -61,7 +61,9 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           ...localBindingConfig,
-          assets: { binding: "ASSETS", run_worker_first: true },
+          // Vite must transform development CSS and browser modules before the
+          // catch-all Worker router. Production keeps Worker-first routing.
+          assets: { binding: "ASSETS", run_worker_first: command !== "serve" },
           // Automatic invocation logs can include QR tokens in request URLs.
           // Application logs use an explicit, redacted field whitelist instead.
           observability: { enabled: true, head_sampling_rate: 1, logs: { enabled: true, invocation_logs: false } },

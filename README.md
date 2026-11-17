@@ -120,6 +120,12 @@ Run `npm test`, `npm run typecheck`, `npm run build`, and (with local preview ru
 
 ## Table session lifecycle
 
+Restaurant staff notifications now include a bell, unread history, read receipts,
+order navigation and opt-in sound alerts over the existing reconnecting poller.
+See [restaurant notifications](docs/RESTAURANT_NOTIFICATIONS.md) for event coverage,
+permissions, testing results and operational limits. No migration or new binding
+is required.
+
 - `OPEN`: guests may place orders and edit Pending/Accepted orders.
 - `BILL_REQUESTED`: a guest bill request atomically pauses new orders and edits. Resolving the request or recording payment does not unlock ordering. Staff with `sessions.open` can use `session.reopen` before finalization.
 - `FINALIZED`: staff with the new `billing.finalize` permission explicitly confirm the reviewed bill. The server checks `expectedVersion` and `expectedTotal`, then preserves a final pricing snapshot and permanently locks order submissions/edits for that session.
