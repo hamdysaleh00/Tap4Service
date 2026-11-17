@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {calculateSplit,calculatorLines,normalizeGuests,changeQuantity} from '../lib/share-calculator.mjs';
-import {createInitialState,applyCommand,guestView} from '../lib/domain.mjs';
+import {createInitialState,applyCommand,guestView,bill} from '../lib/domain.mjs';
 const orders=[{id:'o',lines:[{id:'a',quantity:3,unitPrice:1}]}];
 const guests=[1,2,3].map(id=>({id:String(id),quantities:{'o:a':1}}));
 function reconciles(result){
@@ -56,6 +56,7 @@ test('restaurant session charges and modifier snapshots are reused; recorded pay
  const run=(action,body={})=>applyCommand(state,owner,{action,restaurantId:t.id,...body});
  run('settings.save',{name:t.name,taxBps:1375,serviceBps:925});run('session.open',{tableId:table.id});const s=t.sessions.at(-1),item=t.menu.find(m=>m.modifiers.length);
  run('guest.order',{token:table.token,capability:s.capability,key:crypto.randomUUID(),lines:[{itemId:item.id,quantity:3,modifierIds:[item.modifiers[0].id]}]});
+ run('billing.finalize',{sessionId:s.id,expectedVersion:s.version,expectedTotal:bill(t,s).total});
  run('settings.save',{name:t.name,taxBps:0,serviceBps:0});item.price+=10000;item.available=false;
  const view=guestView(state,table.token),line=view.orders[0].lines[0];assert.equal(view.bill.tax,Math.round(view.bill.subtotal*1375/10000));assert.equal(view.bill.service,Math.round(view.bill.subtotal*925/10000));
  const result=calculateSplit(view.orders,{...view.bill,paid:1,due:view.bill.total-1},[1,2,3].map(id=>({id:String(id),quantities:{[view.orders[0].id+':'+line.id]:1}})));reconciles(result);assert(result.complete);assert.equal(result.bill.total,view.bill.total);

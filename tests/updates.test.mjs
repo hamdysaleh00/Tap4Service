@@ -21,6 +21,22 @@ function fixture(backend='legacy',state=createInitialState(owner)){
  return {backend,db,repository,adapter,state,t,scope,read,command};
 }
 for(const backend of ['legacy','normalized']){
+ test(`${backend}: settings persist live rates, invalidate guest polls and preserve finalized bill history`,async()=>{
+  const f=fixture(backend),s=f.t.sessions[0],table=f.t.tables[0];
+  try{
+   const initial=await f.read({user:null,token:table.token,capability:s.capability});
+   await f.command('settings.save',{name:f.t.name,taxBps:1400,serviceBps:1200});
+   const guest=await f.read({user:null,token:table.token,capability:s.capability,etag:initial.etag});
+   assert(!guest.unchanged);assert.equal(guest.data.session.taxBps,1400);
+   const b=guest.data.bill;assert.equal(b.total,b.subtotal+Math.round(b.subtotal*.14)+Math.round(b.subtotal*.12));
+   const staff=await f.read();assert.deepEqual(staff.data.restaurant.sessions.find(x=>x.id===s.id).bill,b);
+   await assert.rejects(f.command('billing.finalize',{sessionId:s.id,expectedVersion:initial.data.session.version,expectedTotal:initial.data.bill.total}),e=>e.status===409);
+   await f.command('billing.finalize',{sessionId:s.id,expectedVersion:guest.data.session.version,expectedTotal:b.total});
+   await f.command('settings.save',{name:f.t.name,taxBps:0,serviceBps:0});
+   assert.deepEqual((await f.read({user:null,token:table.token})).data.bill,b);
+   assert.deepEqual((await f.read()).data.restaurant.sessions.find(x=>x.id===s.id).bill,b);
+  }finally{f.db.close();}
+ });
  test(`${backend}: bootstrap returns operational state with exact bill totals; unchanged polls use the metadata fast path`,async()=>{
   const state=createInitialState(owner);historical(state.restaurants[0]);const f=fixture(backend,state),result=await f.read(),data=result.data;
   assert.equal(data.restaurant.sessions.length,4);assert.equal(data.restaurant.orders.length,4);assert.equal(data.restaurant.payments.length,0);
