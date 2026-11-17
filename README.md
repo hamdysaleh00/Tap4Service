@@ -132,3 +132,7 @@ After finalization, staff may open a new session on the same permanent QR/NFC li
 Existing JSON state upgrades lazily and is persisted by the next successful D1 compare-and-swap transaction. Legacy ACTIVE records become OPEN (or BILL_REQUESTED if a bill request is outstanding); CLOSED records become released FINALIZED history. Existing restaurant administrators with `permissions.manage` receive `billing.finalize`; other roles must be granted it explicitly. No QR identifiers, orders or payment records are replaced. No SQL schema migration is required.
 
 Local lifecycle verification: `node tests/session-lifecycle.integration.mjs` checks real D1 races; `node tests/session-lifecycle.ui.local.mjs` checks English/Arabic guest and restaurant flows. Both require a local preview; browser tests use the same Playwright options described above.
+
+Cashier POS, financial adjustments, mixed payments, shifts, handovers and reports
+are documented in [Cashier POS and financial operations](docs/CASHIER_POS_FINANCE.md).
+That document supersedes the original Alpha boundaries below for those features.

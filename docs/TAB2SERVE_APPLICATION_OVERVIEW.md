@@ -5,6 +5,12 @@ checkout; it is not a production-readiness certification. No tests, database
 operations or deployments were performed for this documentation task. Current
 source takes precedence over older README descriptions, particularly for billing.
 
+> **Subsequent POS implementation:** the cashier, discount/refund/void, shift,
+> handover and reporting capabilities described below as planned have since been
+> implemented on `codex/cashier-pos-finance`. See [cashier POS and financial
+> operations](CASHIER_POS_FINANCE.md) for behavior, verification, compatibility
+> and remaining acceptance. This overview retains the earlier source baseline.
+
 ## 1. Executive Overview
 
 Tab2Serve is a bilingual restaurant and café ordering and operations application.

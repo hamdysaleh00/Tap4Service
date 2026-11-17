@@ -95,6 +95,7 @@ export async function runCommand(user:StaffIdentity|null,body:Record<string,unkn
  if(scope)enforceScope(scope,body.restaurantId,body.action);
  if(scope?.kind==='tenant')body={...body,restaurantId:scope.restaurantId};
  const store=normalized();if(store)return store.command(user,body,scope);
+ if(body.action==='finance.report'){const snapshot=await readState();if(!snapshot)throw new AppError('A staff administrator must initialize this workspace.',503);return applyCommand(scope?scopeState(snapshot.state,scope):snapshot.state,user,body);}
  return transaction(state=>applyCommand(scope?scopeState(state,scope):state,user,body));
 }
 export async function readState() {

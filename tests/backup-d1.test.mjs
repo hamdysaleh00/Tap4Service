@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import {tmpdir} from 'node:os';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes } from 'node:crypto';
 import { mkdtemp,writeFile,readFile,mkdir,rm } from 'node:fs/promises';
@@ -11,7 +12,9 @@ import { migrationPlan } from '../lib/normalized-migration.mjs';
 import { applyPlan } from '../scripts/normalized-migration.mjs';
 import { exportSql } from '../lib/backup.mjs';
 test('offline backup CLI rehearses/prepares a recovery artifact that restores into an isolated real D1 database',async()=>{
- const workspace=path.resolve('outputs');await mkdir(workspace,{recursive:true});const directory=await mkdtemp(path.join(workspace,'d1-recovery-'));
+ // workerd/SQLite still uses short Windows paths even when Node supports long
+ // ones. Keep this disposable local-only fixture below MAX_PATH on Windows.
+ const workspace=process.platform==='win32'?path.resolve(tmpdir(),'t2s-backup-tests'):path.resolve('outputs');await mkdir(workspace,{recursive:true});const directory=await mkdtemp(path.join(workspace,'d1-recovery-'));
  // Every file/recursive cleanup target is resolved and constrained to outputs.
  assert(directory.startsWith(workspace+path.sep));
  try{

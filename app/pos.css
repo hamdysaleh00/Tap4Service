@@ -1,0 +1,13 @@
+.pos-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.pos-field{display:flex;flex-direction:column;gap:8px;margin-block:16px;font-size:12px;font-weight:600}
+.pos-field input,.pos-field select,.pos-field textarea{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line,#dce2d8);border-radius:8px;background:white;color:inherit;font:inherit}
+.pos-field input[type=number]{direction:ltr;text-align:start}.pos-field textarea{min-height:80px;resize:vertical}
+.pos-products{display:flex;gap:8px;flex-wrap:wrap;margin-block:16px;max-height:280px;overflow:auto}
+.pos-products .button{font-size:12px;text-align:start;white-space:normal}
+.pos-basket-line,.pos-order{padding-block:16px;border-block-end:1px solid var(--line,#dce2d8)}
+.pos-basket-line .pos-field{margin-block:10px}.pos-order small{display:block;font-size:11px;color:#6b7564;overflow-wrap:anywhere}
+.pos-order .button-row{margin-block-start:12px}.pos-cancelled{text-decoration:line-through;opacity:.65}
+.pos-money{margin-block:20px}.pos-money>div{display:flex;justify-content:space-between;gap:12px;margin-block:10px;font-size:13px}.pos-money dd{font-weight:600;white-space:nowrap}
+.pos-history{padding-block:12px;border-block-end:1px solid var(--line,#dce2d8);font-size:12px;overflow-wrap:anywhere}.pos-history small{display:block;margin-block-start:6px;color:#6b7564;font-size:10px}
+.pos-table-scroll{overflow-x:auto}.pos-table{width:100%;border-collapse:collapse;font-size:12px}.pos-table th,.pos-table td{text-align:start;padding:12px;border-block-end:1px solid var(--line,#dce2d8)}
+@media(max-width:1000px){.pos-workspace{grid-template-columns:1fr}.pos-products{max-height:220px}}
