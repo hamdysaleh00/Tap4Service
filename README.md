@@ -22,10 +22,10 @@ This candidate fails closed outside local development until normalized D1,
 independent authentication and both Cloudflare rate-limit bindings are configured.
 No production configuration is applied automatically.
 
-Restaurant appearance is managed exclusively by Tap2Serve Super Admin. The
-[design system guide](docs/RESTAURANT_DESIGN_SYSTEM.md) covers the code registry,
-branding configuration, private bilingual previews, publishing, rollback and
-staged database compatibility. Restaurant owners retain operational controls.
+Restaurant appearance uses one shared Design Studio with six templates, approved
+owner/manager controls, live bilingual previews, private drafts and version history.
+The [design system guide](docs/RESTAURANT_DESIGN_SYSTEM.md) documents permissions,
+contrast protection, publishing and Cloudflare/D1 compatibility.
 
 Multi-tenant hostname routing is implemented locally for `tap2serve.com`,
 `admin.tap2serve.com` and restaurant subdomains. See the

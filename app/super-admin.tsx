@@ -25,5 +25,5 @@ function Restaurant({restaurant:r,routing,command,busy}:{restaurant:Summary;rout
   <label>Support status<input maxLength={80} value={supportStatus} onChange={e=>setSupportStatus(e.target.value)}/></label>
   <div className="setup-checklist">{Object.entries(setup).map(([key,value])=><label key={key}><input type="checkbox" checked={value} onChange={e=>setSetup({...setup,[key]:e.target.checked})}/>{key}</label>)}</div>
   <button className="button" disabled={busy}>Save subscription and setup</button>
- </form><DesignEditor restaurantId={r.id} command={command}/></section>;
+ </form><DesignEditor restaurantId={r.id} command={command} platform/></section>;
 }

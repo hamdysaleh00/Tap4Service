@@ -67,9 +67,10 @@ it does not process a payment or automatically drive a thermal printer.
 
 Authorized managers maintain menus, categories, modifiers, availability, visibility,
 tables, staff permissions, bilingual content and tax/service rates. Restaurant
-appearance is controlled by Tap2Serve Super Admin through a versioned design
-configuration, preview, publish and revert workflow. Owners do not receive unrestricted
-design controls. The current design registry contains one implementation.
+appearance is controlled through the shared Restaurant Design Studio by Super Admin
+and authorized restaurant owners/managers. Six templates, validated visual settings,
+private live previews, publication and version history extend the existing design
+configuration. See RESTAURANT_DESIGN_SYSTEM.md for permissions and boundaries.
 
 The platform administrator can provision restaurants, configure subscription
 amounts/status and billable-table counts, and track setup/support status. These
@@ -126,7 +127,7 @@ external status lacks evidence. Each numbered row is one inventory group.
 | A18 | A | Staff activity/audit records and activity view — `lib/domain.mjs`, `lib/updates-repository.mjs`. |
 | A19 | A | Multiple restaurant workspaces and tenant/hostname scoping — `lib/tenant-routing.mjs`, `lib/store.ts`. |
 | A20 | A | Platform provisioning, subscription configuration and onboarding/support records — `app/super-admin.tsx`, `lib/domain.mjs`. |
-| A21 | A | Super Admin branding/design configuration, private preview, publication and rollback — `app/design-editor.tsx`, `lib/restaurant-designs/config.mjs`; one registered design. |
+| A21 | A | Restaurant Design Studio: six templates, approved manager controls, private live preview, publication and version history - `app/design-editor.tsx`, `lib/restaurant-designs/config.mjs`. |
 | A22 | A | English/Arabic, RTL/LTR, money/error localization and device/identity language preference — `app/i18n.tsx`, `lib/i18n.mjs`, `lib/locales/`. |
 | A23 | A | Responsive guest/staff layouts and receipt print CSS — `app/style.css`, `app/restaurant-designs/design.css`; device coverage not certified. |
 | A24 | A | Approximately two-second polling, reconnect handling and in-app new-order notices — `app/tab2serve.tsx`, `lib/polling.mjs`; no sound/push claim. |

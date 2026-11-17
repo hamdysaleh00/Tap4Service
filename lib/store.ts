@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { AppError, createInitialState, bindUser, isPlatformAdmin } from './domain.mjs';
+import { AppError, createInitialState, bindUser, isPlatformAdmin, authorizeDesign } from './domain.mjs';
 import { staffView, guestView, applyCommand } from './domain.mjs';
 import { createNormalizedStore } from './normalized-store.mjs';
 import { classifyHostname, ensureRestaurantSlugs, enforceScope, scopeState, RoutingError } from './tenant-routing.mjs';
@@ -52,15 +52,16 @@ export async function loadPublicRestaurant(scope:TenantScope) {
  return publicView(scopeState(current.state,scope).restaurants[0]);
 }
 export async function loadRestaurantDesign(user:StaffIdentity|null,restaurantId:string,scope:TenantScope){
- if(!['admin','local'].includes(scope.kind))throw new AppError('Platform administrator access required.',403);
+ if(!['admin','local','tenant'].includes(scope.kind))throw new AppError('Restaurant design access denied.',403);
+ enforceScope(scope,restaurantId,scope.kind==='admin'?'platform.design.read':'design.read');
  if(!user?.id)throw new AppError('Staff sign-in required.',401);
  const store=normalized();
  let result;
- if(store)result=await store.design(user,restaurantId);
+ if(store)result=await store.design(user,restaurantId,scope);
  else{
   const current=await readState();if(!current)throw new AppError('Restaurant setup is not complete.',503);
-  if(!isPlatformAdmin(current.state,user))throw new AppError('Platform administrator access required.',403);
-  const restaurant=current.state.restaurants.find((t:{id:string})=>t.id===restaurantId);if(!restaurant)throw new AppError('Restaurant not found.',404);
+  if(scope.kind==='admin'&&!isPlatformAdmin(current.state,user))throw new AppError('Platform administrator access required.',403);
+  const restaurant=authorizeDesign(scopeState(current.state,scope),user,restaurantId);
   result={management:designState(restaurant),restaurant:publicView(restaurant)};
  }
  return {...result,catalog:DESIGN_CATALOG.map(({id,name,description})=>({id,name,description}))};

@@ -8,9 +8,10 @@ import { createInitialState, createRestaurant, PERMISSIONS } from '../lib/domain
 import { migrationPlan } from '../lib/normalized-migration.mjs';
 import { insertStatement } from '../lib/normalized-model.mjs';
 import { schemaArtifacts } from '../scripts/generate-normalized-schema.mjs';
-import { DEFAULT_CONFIG } from '../lib/restaurant-designs/config.mjs';
+import { DEFAULT_CONFIG, templateConfig } from '../lib/restaurant-designs/config.mjs';
 const serverRoot=path.resolve('dist/server');const files=await readdir(serverRoot,{recursive:true});
 const modules=['index.js',...files.filter(f=>f.endsWith('.js')&&f!=='index.js')].map(f=>({type:'ESModule',path:path.join(serverRoot,f)}));
+import { DESIGN_CATALOG } from '../lib/restaurant-designs/catalog.mjs';
 const owner={id:'owner',email:'owner@example.test'},staff={id:'staff-a',email:'staff@example.test'};
 const pair=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
 const jwk={...await crypto.subtle.exportKey('jwk',pair.publicKey),kid:'worker-test',use:'sig',alg:'RS256'};
@@ -47,14 +48,14 @@ for(const mode of ['legacy','normalized'])test(`built Worker ${mode}: hosts, pub
   // Super Admin draft/preview/publication routes remain separate from tenant APIs.
   assert.equal((await fetch('admin.tap2serve.com','/api/design?restaurant='+a.id)).status,401);
   assert.equal((await fetch('admin.tap2serve.com','/api/design?restaurant='+a.id,staffAuth)).status,403);
-  assert.equal((await fetch('olive.tap2serve.com','/api/design?restaurant='+a.id,ownerAuth)).status,403);
+  assert.equal((await fetch('olive.tap2serve.com','/api/design?restaurant='+a.id,ownerAuth)).status,200);
   const initialDesign=await ok(fetch('admin.tap2serve.com','/api/design?restaurant='+a.id,ownerAuth));assert.equal(initialDesign.management.version,0);
   const design=structuredClone(DEFAULT_CONFIG);design.branding.heroTitle={en:'PRIVATE DESIGN DRAFT',ar:'عنوان عربي خاص'};design.colors.primary='#103c54';
   await ok(command('admin.tap2serve.com','platform.design.save',{restaurantId:a.id,config:design,expectedVersion:0},ownerAuth));
   response=await fetch('olive.tap2serve.com');assert.doesNotMatch(await response.text(),/PRIVATE DESIGN DRAFT/);
   response=await fetch('admin.tap2serve.com',`/design-preview?restaurant=${a.id}&version=1&lang=ar`,ownerAuth);assert.equal(response.status,200);const previewHTML=await response.text();assert.match(previewHTML,/عنوان عربي خاص/);assert.match(previewHTML,/dir="rtl"/);assert.match(previewHTML,/inert/);
   response=await fetch('admin.tap2serve.com',`/design-preview?restaurant=${a.id}&version=1&view=guest`,ownerAuth);assert.equal(response.status,200);assert.match(await response.text(),/guest-nav/);
-  assert.equal((await fetch('olive.tap2serve.com',`/design-preview?restaurant=${a.id}&version=1`,ownerAuth)).status,404);
+  assert.equal((await fetch('olive.tap2serve.com',`/design-preview?restaurant=${a.id}&version=1`,ownerAuth)).status,200);
   assert.equal((await fetch('admin.tap2serve.com',`/design-preview?restaurant=${a.id}&version=1`,staffAuth)).status,404);
   assert.equal((await command('olive.tap2serve.com','platform.design.publish',{restaurantId:a.id,expectedVersion:1},ownerAuth)).status,403);
   assert.equal((await command('olive.tap2serve.com','settings.save',{name:'Blocked',taxBps:0,serviceBps:0,logo:'https://example.test/hack.png'},staffAuth)).status,403);
@@ -65,6 +66,35 @@ for(const mode of ['legacy','normalized'])test(`built Worker ${mode}: hosts, pub
   assert.equal((await command('admin.tap2serve.com','platform.design.publish',{restaurantId:a.id,expectedVersion:1},ownerAuth)).status,409);
   await ok(command('admin.tap2serve.com','platform.design.revert',{restaurantId:a.id,expectedVersion:2},ownerAuth));
   response=await fetch('olive.tap2serve.com');assert.doesNotMatch(await response.text(),/PRIVATE DESIGN DRAFT/);
+
+  // Managers use the shared guest screens for every approved template.
+  let designVersion=3;
+  for(const entry of DESIGN_CATALOG){
+   const config=templateConfig(entry.id);config.branding.logoUrl='https://example.test/logo.png';config.branding.heroImageUrl='https://example.test/banner.png';config.branding.backgroundImageUrl='https://example.test/background.png';config.branding.heroTitle.en='Manager draft '+entry.id;
+   config.colors.button='#ff00cc';config.colors.text='#ffffff';
+   await ok(command('olive.tap2serve.com','design.save',{restaurantId:a.id,config,expectedVersion:designVersion++},staffAuth));
+   const saved=await ok(fetch('olive.tap2serve.com','/api/design?restaurant='+a.id,staffAuth));assert.equal(saved.management.draft.colors.button,'#ff00cc');assert.equal(saved.management.draft.branding.logoUrl,config.branding.logoUrl);
+   assert.doesNotMatch(await (await fetch('olive.tap2serve.com')).text(),new RegExp('Manager draft '+entry.id));
+   for(const lang of ['en','ar'])for(const view of ['site','menu','item','basket','orders','bill']){
+    const preview=await fetch('olive.tap2serve.com','/design-preview?restaurant='+a.id+'&version='+designVersion+'&lang='+lang+'&view='+view,staffAuth);assert.equal(preview.status,200);
+    assert.match(preview.headers.get('cache-control'),/no-store/);const html=await preview.text();assert.match(html,new RegExp('data-design="'+entry.id+'"'));assert.match(html,new RegExp('dir="'+(lang==='ar'?'rtl':'ltr')+'"'));assert.match(html,/inert/);
+    if(view!=='site')assert.match(html,/guest-nav/);if(view==='basket')assert.match(html,/basket-total/);if(view==='item')assert.match(html,/item-modal-footer/);if(view==='bill')assert.match(html,/guest-bill/);
+   }
+   await ok(command('olive.tap2serve.com','design.publish',{restaurantId:a.id,expectedVersion:designVersion++},staffAuth));
+   const live=await (await fetch('olive.tap2serve.com')).text();assert.match(live,new RegExp('data-design="'+entry.id+'"'));assert.match(live,/#ff00cc/);
+   const guest=await ok(fetch('olive.tap2serve.com','/api/state?table='+a.tables[0].token));assert.equal(guest.restaurant.appearance.implementationId,entry.id);assert.doesNotMatch(JSON.stringify(guest),/websiteDesign|publishedBy|history|updatedBy/);
+  }
+  const history=await ok(fetch('olive.tap2serve.com','/api/design?restaurant='+a.id,staffAuth)),target=history.management.history.find(h=>h.config.implementationId==='modern-cafe');assert(target);
+  await ok(command('olive.tap2serve.com','design.reset',{restaurantId:a.id,expectedVersion:designVersion++},staffAuth));
+  const reset=await ok(fetch('olive.tap2serve.com','/api/design?restaurant='+a.id,staffAuth));assert.equal(reset.management.draft.implementationId,'tap2serve-classic');assert.equal(reset.management.published.implementationId,'contemporary-restaurant');
+  await ok(command('olive.tap2serve.com','design.revert',{restaurantId:a.id,expectedVersion:designVersion++,targetVersion:target.version},staffAuth));assert.match(await (await fetch('olive.tap2serve.com')).text(),/data-design="modern-cafe"/);
+  assert.equal((await command('olive.tap2serve.com','design.reset',{restaurantId:b.id,expectedVersion:0},staffAuth)).status,403);
+  assert.equal((await command('olive.tap2serve.com','design.reset',{restaurantId:a.id,expectedVersion:designVersion})).status,401);
+  assert.equal((await fetch('other.tap2serve.com','/api/design?restaurant='+b.id,staffAuth)).status,403);
+  assert.equal((await fetch('olive.tap2serve.com','/api/design?restaurant='+b.id,ownerAuth)).status,403);
+  assert.equal((await fetch('olive.tap2serve.com','/design-preview?restaurant='+b.id+'&version=0',staffAuth)).status,404);
+  assert.equal((await fetch('olive.tap2serve.com','/design-preview?restaurant='+a.id+'&version='+designVersion)).status,404);
+  assert.equal((await ok(fetch('other.tap2serve.com','/api/design?restaurant='+b.id,ownerAuth))).management.version,0);
   assert.equal((await command('olive.tap2serve.com','platform.create',{name:'Denied',slug:'denied'},ownerAuth)).status,403);
   assert.equal((await command('olive.tap2serve.com','session.open',{restaurantId:b.id,tableId:b.tables[1].id},ownerAuth)).status,403);
   assert.equal((await fetch('olive.tap2serve.com','/api/state?table='+b.tables[0].token)).status,404);
