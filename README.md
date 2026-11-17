@@ -1,5 +1,27 @@
 # Tab2Serve Alpha Version — Initial Testing Release
 
+The approved infrastructure is Cloudflare Registrar, Cloudflare DNS, Cloudflare
+Workers for frontend assets and backend APIs, Cloudflare D1, Cloudflare-managed
+HTTPS certificates and restaurant subdomains, with GitHub for source control.
+Business email remains a separate decision. Hostinger, Vercel, Netlify or any
+alternative hosting provider requires explicit approval.
+See the [mandatory Cloudflare architecture audit](docs/CLOUDFLARE_ARCHITECTURE_AUDIT.md)
+for verified compatibility, remaining blockers and the operating sequence.
+The local candidate is compatible but **not ready for production operation**;
+the audit performed no deployment, production migration or live infrastructure change.
+
+See the [production security, recovery and readiness checklist](docs/PRODUCTION_READINESS.md).
+For standalone Workers Paid + D1 deployment preparation, start with the
+[deployment readiness report](docs/DEPLOYMENT_READINESS_REPORT.md) and
+[step-by-step Cloudflare guide](docs/CLOUDFLARE_DEPLOYMENT.md). Separate staging
+and production templates, a two-restaurant acceptance checklist and monthly
+usage estimates are included. No cloud resources or DNS changes are applied.
+The Alpha quickstart below describes the retained legacy Sites workflow;
+standalone deployment uses the independent-authentication guide above.
+This candidate fails closed outside local development until normalized D1,
+independent authentication and both Cloudflare rate-limit bindings are configured.
+No production configuration is applied automatically.
+
 Restaurant appearance is managed exclusively by Tap2Serve Super Admin. The
 [design system guide](docs/RESTAURANT_DESIGN_SYSTEM.md) covers the code registry,
 branding configuration, private bilingual previews, publishing, rollback and
@@ -20,7 +42,7 @@ A bilingual restaurant-first Alpha release for internal workflow validation buil
 
 ## Run locally
 
-Requires Node 22.13+ and npm. From this folder:
+Requires Node 24.12+ and npm (including the offline backup tests). From this folder:
 
 ```sh
 npm ci

@@ -245,6 +245,12 @@ CREATE TABLE IF NOT EXISTS sessions (
   FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)
 );
 
+CREATE INDEX IF NOT EXISTS sessions_history_position ON sessions (restaurant_id,position);
+
+CREATE INDEX IF NOT EXISTS sessions_sync_occupied ON sessions (restaurant_id,id) WHERE released_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS sessions_sync_open_bill ON sessions (restaurant_id,id) WHERE status='FINALIZED' AND closed_at IS NULL;
+
 CREATE UNIQUE INDEX IF NOT EXISTS sessions_occupancy ON sessions (restaurant_id,table_id) WHERE released_at IS NULL;
 
 CREATE INDEX IF NOT EXISTS sessions_status ON sessions (restaurant_id,status,opened_at);
@@ -408,6 +414,8 @@ CREATE TABLE IF NOT EXISTS service_requests (
   FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)
 );
 
+CREATE INDEX IF NOT EXISTS service_requests_history_position ON service_requests (restaurant_id,position);
+
 CREATE INDEX IF NOT EXISTS service_requests_session ON service_requests (restaurant_id,session_id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS service_requests_outstanding ON service_requests (restaurant_id,session_id,kind) WHERE status <> 'resolved';
@@ -435,6 +443,8 @@ CREATE TABLE IF NOT EXISTS feedback (
   FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id),
   FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)
 );
+
+CREATE INDEX IF NOT EXISTS feedback_history_position ON feedback (restaurant_id,position);
 
 CREATE INDEX IF NOT EXISTS feedback_session ON feedback (restaurant_id,session_id);
 
@@ -500,6 +510,8 @@ CREATE TABLE IF NOT EXISTS audit_events (
   CONSTRAINT audit_events_present_json CHECK(json_valid(present_json)),
   FOREIGN KEY(restaurant_id) REFERENCES restaurants(id)
 );
+
+CREATE INDEX IF NOT EXISTS audit_events_history_position ON audit_events (restaurant_id,position);
 
 CREATE INDEX IF NOT EXISTS audit_events_recent ON audit_events (restaurant_id,actor,occurred_at);
 

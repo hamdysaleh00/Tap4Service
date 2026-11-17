@@ -59,8 +59,8 @@ export default function Tab2Serve(){
   const engine=createPoller({interval:location.hostname.startsWith('admin.')?30000:2000,
    async request(signal:AbortSignal){
     const params=new URLSearchParams({view:syncView});if(cursor!==null)params.set('cursor',cursor);
-    if(token){params.set('table',token);if(cap.current)params.set('session',cap.current);}else if(restaurantId)params.set('restaurant',restaurantId);
-    const headers:Record<string,string>={'Accept-Language':language};if(etag&&!force)headers['If-None-Match']=etag;force=false;
+    if(token)params.set('table',token);else if(restaurantId)params.set('restaurant',restaurantId);
+    const headers:Record<string,string>={'Accept-Language':language};if(token&&cap.current)headers['X-Guest-Session']=cap.current;if(etag&&!force)headers['If-None-Match']=etag;force=false;
     const response=await fetch('/api/updates?'+params,{signal,cache:'no-store',headers});
     if(response.status===304)return {unchanged:true};
     const value:Any=await response.json();if(!response.ok){const error:Any=new Error(value.errorKey||value.error);error.status=response.status;error.retryAfter=parseRetryAfter(response.headers.get('Retry-After'));throw error;}

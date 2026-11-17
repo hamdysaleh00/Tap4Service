@@ -1,0 +1,52 @@
+{
+  "measuredAt": "2026-11-17T02:26:29.173Z",
+  "localOnly": true,
+  "scope": "20 sequential requests, 2 synthetic venues, 100 released history sessions/venue; no capacity claim",
+  "fullSnapshotMs": {
+    "n": 10,
+    "min": 21.939400000000205,
+    "p50": 24.01379999999972,
+    "p95": 44.77970000000005,
+    "max": 44.77970000000005
+  },
+  "conditionalSnapshotMs": {
+    "n": 10,
+    "min": 6.736800000000585,
+    "p50": 7.113199999999779,
+    "p95": 8.471099999999751,
+    "max": 8.471099999999751
+  },
+  "fullSnapshotRowsRead": {
+    "n": 10,
+    "min": 744,
+    "p50": 744,
+    "p95": 744,
+    "max": 744
+  },
+  "conditionalRowsRead": {
+    "n": 10,
+    "min": 9,
+    "p50": 9,
+    "p95": 9,
+    "max": 9
+  },
+  "hostProcessCpuMicros": {
+    "user": 16000,
+    "system": 0
+  },
+  "hostProcessMemoryBefore": {
+    "rss": 261873664,
+    "heapTotal": 67690496,
+    "heapUsed": 44225816,
+    "external": 29159783,
+    "arrayBuffers": 16448357
+  },
+  "hostProcessMemoryAfter": {
+    "rss": 262811648,
+    "heapTotal": 67952640,
+    "heapUsed": 34711144,
+    "external": 29355868,
+    "arrayBuffers": 16675190
+  },
+  "limitation": "Node harness metrics exclude separate workerd CPU and do not measure per-isolate memory or paid Workers latency."
+}

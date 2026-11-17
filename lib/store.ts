@@ -26,11 +26,12 @@ export async function resolveScope(request:Request):Promise<TenantScope> {
  let restaurant;
  if(store)restaurant=await store.findRestaurant(scope.slug);
  else{
-  const matches=await env.DB!.prepare("SELECT json_extract(r.value,'$.id') id FROM app_state a,json_each(a.payload,'$.restaurants') r WHERE a.id='main' AND json_extract(r.value,'$.slug')=? LIMIT 2").bind(scope.slug).all<{id:string}>();
-  if(matches.results.length>1)throw new RoutingError('Duplicate restaurant slug. Contact the platform administrator.',503);
-  restaurant=matches.results[0];
-  // Compatibility only for pre-slug exports. Normal polling never reads payload.
-  if(!restaurant){const legacy=await env.DB!.prepare("SELECT 1 found FROM app_state a,json_each(a.payload,'$.restaurants') r WHERE a.id='main' AND json_extract(r.value,'$.slug') IS NULL LIMIT 1").first();if(legacy){const current=await readState();restaurant=current&&ensureRestaurantSlugs(current.state).restaurants.find((t:{slug:string})=>t.slug===scope.slug);}}
+  const matches=await env.DB!.prepare("SELECT json_extract(r.value,'$.id') id,json_extract(r.value,'$.name') name,json_extract(r.value,'$.slug') slug FROM app_state a,json_each(a.payload,'$.restaurants') r WHERE a.id='main' AND (json_extract(r.value,'$.slug')=? OR json_extract(r.value,'$.slug') IS NULL)").bind(scope.slug).all<{id:string;name:string;slug:string|null}>();
+  // Old exports need only id/name metadata to derive their stable legacy slug.
+  // Never materialize orders, payments or a full platform payload for routing.
+  const resolved=ensureRestaurantSlugs({restaurants:matches.results}).restaurants.filter((t:{slug:string})=>t.slug===scope.slug);
+  if(resolved.length>1)throw new RoutingError('Duplicate restaurant slug. Contact the platform administrator.',503);
+  restaurant=resolved[0];
  }
  if(!restaurant)throw new RoutingError();
  return {...scope,restaurantId:restaurant.id};

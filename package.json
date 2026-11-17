@@ -3,7 +3,7 @@
   "version": "0.2.0-alpha.1",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=24.12.0"
   },
   "scripts": {
     "dev": "node scripts/run-framework.mjs dev",
@@ -18,7 +18,9 @@
     "test:normalized-worker": "node tests/normalized-worker.integration.mjs",
     "test:auth-worker": "node tests/auth-worker.integration.mjs",
     "typecheck": "tsc --noEmit",
-    "test:tenant-worker": "node tests/tenant-worker.integration.mjs"
+    "test:tenant-worker": "node tests/tenant-worker.integration.mjs",
+    "test:production-worker": "node tests/production-worker.integration.mjs",
+    "ops:backup": "node scripts/backup-restore.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

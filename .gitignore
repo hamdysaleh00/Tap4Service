@@ -30,6 +30,7 @@ debug.log
 # Local environment and keys
 .env*
 .dev.vars*
+config/*.local.jsonc
 *.pem
 
 # Checkout-local tool state

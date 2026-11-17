@@ -1,0 +1,73 @@
+{
+  "completedAt": "2026-11-17T02:26:59.390Z",
+  "node": "v26.13.1",
+  "localOnly": true,
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 4913
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 10542
+    },
+    {
+      "name": "build",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 14505
+    },
+    {
+      "name": "normalized-worker",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 4066
+    },
+    {
+      "name": "auth-worker",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 8367
+    },
+    {
+      "name": "tenant-worker",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 7778
+    },
+    {
+      "name": "production-worker",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 7116
+    },
+    {
+      "name": "updates-worker",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 12557
+    },
+    {
+      "name": "two-restaurants",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 5843
+    },
+    {
+      "name": "staging-dry-run",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 1071
+    },
+    {
+      "name": "production-dry-run",
+      "status": 0,
+      "passed": true,
+      "elapsedMs": 1221
+    }
+  ]
+}

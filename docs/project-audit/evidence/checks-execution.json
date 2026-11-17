@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-11-17T02:26:29.252Z",
+  "results": [
+    {
+      "name": "lint",
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        ".",
+        "--ignore-pattern",
+        "dist",
+        "--ignore-pattern",
+        ".next",
+        "--format",
+        "json"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 13357
+    },
+    {
+      "name": "audit-integration",
+      "command": [
+        "node",
+        "tests/project-audit.integration.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 7737
+    }
+  ]
+}

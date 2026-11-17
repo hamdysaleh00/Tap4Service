@@ -1,0 +1,236 @@
+{
+  "dependencies": [
+    {
+      "name": "@base-ui/react",
+      "declared": "^1.7.0",
+      "installed": "1.9.0"
+    },
+    {
+      "name": "@hookform/resolvers",
+      "declared": "^5.7.1",
+      "installed": "5.9.2"
+    },
+    {
+      "name": "@shadcn/react",
+      "declared": "^0.3.0",
+      "installed": "0.3.1"
+    },
+    {
+      "name": "class-variance-authority",
+      "declared": "0.7.1",
+      "installed": "0.7.1"
+    },
+    {
+      "name": "clsx",
+      "declared": "2.1.1",
+      "installed": "2.1.1"
+    },
+    {
+      "name": "cmdk",
+      "declared": "^1.1.1",
+      "installed": "1.1.1"
+    },
+    {
+      "name": "date-fns",
+      "declared": "^4.4.0",
+      "installed": "4.4.0"
+    },
+    {
+      "name": "drizzle-orm",
+      "declared": "0.45.2",
+      "installed": "0.45.2"
+    },
+    {
+      "name": "embla-carousel-react",
+      "declared": "^8.6.0",
+      "installed": "8.6.0"
+    },
+    {
+      "name": "input-otp",
+      "declared": "^1.4.2",
+      "installed": "1.5.0"
+    },
+    {
+      "name": "lucide-react",
+      "declared": "^1.31.0",
+      "installed": "1.73.0"
+    },
+    {
+      "name": "next",
+      "declared": "16.3.4",
+      "installed": "16.3.4"
+    },
+    {
+      "name": "next-themes",
+      "declared": "^0.4.6",
+      "installed": "0.4.6"
+    },
+    {
+      "name": "radix-ui",
+      "declared": "^1.6.7",
+      "installed": "1.8.1"
+    },
+    {
+      "name": "react",
+      "declared": "19.2.6",
+      "installed": "19.2.6"
+    },
+    {
+      "name": "react-day-picker",
+      "declared": "^10.0.1",
+      "installed": "10.0.2"
+    },
+    {
+      "name": "react-dom",
+      "declared": "19.2.6",
+      "installed": "19.2.6"
+    },
+    {
+      "name": "react-hook-form",
+      "declared": "^7.85.0",
+      "installed": "7.92.0"
+    },
+    {
+      "name": "react-resizable-panels",
+      "declared": "^4.12.2",
+      "installed": "4.24.0"
+    },
+    {
+      "name": "recharts",
+      "declared": "^3.8.0",
+      "installed": "3.10.1"
+    },
+    {
+      "name": "sonner",
+      "declared": "^2.0.8",
+      "installed": "2.0.8"
+    },
+    {
+      "name": "tailwind-merge",
+      "declared": "3.6.0",
+      "installed": "3.6.0"
+    },
+    {
+      "name": "vaul",
+      "declared": "^1.1.2",
+      "installed": "1.1.2"
+    },
+    {
+      "name": "zod",
+      "declared": "^3.25.76",
+      "installed": "3.25.76"
+    },
+    {
+      "name": "qrcode",
+      "declared": "^1.5.4",
+      "installed": "1.5.4"
+    }
+  ],
+  "devDependencies": [
+    {
+      "name": "@cloudflare/vite-plugin",
+      "declared": "1.37.1",
+      "installed": "1.37.1"
+    },
+    {
+      "name": "@cloudflare/workers-types",
+      "declared": "4.20260515.1",
+      "installed": "4.20260515.1"
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "declared": "4.2.1",
+      "installed": "4.2.1"
+    },
+    {
+      "name": "@types/node",
+      "declared": "22.19.19",
+      "installed": "22.19.19"
+    },
+    {
+      "name": "@types/react",
+      "declared": "19.2.14",
+      "installed": "19.2.14"
+    },
+    {
+      "name": "@types/react-dom",
+      "declared": "19.2.3",
+      "installed": "19.2.3"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "declared": "6.0.2",
+      "installed": "6.0.2"
+    },
+    {
+      "name": "@vitejs/plugin-rsc",
+      "declared": "0.5.26",
+      "installed": "0.5.26"
+    },
+    {
+      "name": "drizzle-kit",
+      "declared": "0.31.10",
+      "installed": "0.31.10"
+    },
+    {
+      "name": "eslint",
+      "declared": "9.39.4",
+      "installed": "9.39.4"
+    },
+    {
+      "name": "eslint-config-next",
+      "declared": "16.3.4",
+      "installed": "16.3.4"
+    },
+    {
+      "name": "json-rpc-2.0",
+      "declared": "1.7.1",
+      "installed": "1.7.1"
+    },
+    {
+      "name": "raw-body",
+      "declared": "3.0.2",
+      "installed": "3.0.2"
+    },
+    {
+      "name": "react-server-dom-webpack",
+      "declared": "19.2.6",
+      "installed": "19.2.6"
+    },
+    {
+      "name": "tailwindcss",
+      "declared": "4.2.1",
+      "installed": "4.2.1"
+    },
+    {
+      "name": "tw-animate-css",
+      "declared": "^1.4.0",
+      "installed": "1.4.0"
+    },
+    {
+      "name": "typescript",
+      "declared": "5.9.3",
+      "installed": "5.9.3"
+    },
+    {
+      "name": "vinext",
+      "declared": "1.0.0-beta.5",
+      "installed": "1.0.0-beta.5"
+    },
+    {
+      "name": "vite",
+      "declared": "8.0.13",
+      "installed": "8.0.13"
+    },
+    {
+      "name": "wrangler",
+      "declared": "4.92.0",
+      "installed": "4.92.0"
+    },
+    {
+      "name": "@types/qrcode",
+      "declared": "^1.5.6",
+      "installed": "1.5.6"
+    }
+  ]
+}

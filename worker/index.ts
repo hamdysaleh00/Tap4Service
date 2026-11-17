@@ -38,6 +38,11 @@ async function handleRequest(request:Request,env:Cloudflare.Env,ctx:ExecutionCon
       }catch(error){return routingFailure(error);}
     }
     if(scope.kind==='bridge')return routingFailure(new RoutingError(),api);
+    // With run_worker_first, the custom entry must serve browser build assets
+    // explicitly. Keep tenant/config checks and the outer security headers, and
+    // never expose build metadata or turn an API miss into an asset fallback.
+    const buildAsset=/^\/_next\/static\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_.-]+\.(?:js|css|woff2?|ttf|otf|png|jpe?g|webp|svg|ico|avif)$/.test(url.pathname);
+    if(env.ASSETS&&(buildAsset||url.pathname==='/favicon.svg')&&['GET','HEAD'].includes(request.method))return env.ASSETS.fetch(request);
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.

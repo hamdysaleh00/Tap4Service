@@ -61,7 +61,7 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           ...localBindingConfig,
-          assets: { run_worker_first: true },
+          assets: { binding: "ASSETS", run_worker_first: true },
           // Automatic invocation logs can include QR tokens in request URLs.
           // Application logs use an explicit, redacted field whitelist instead.
           observability: { enabled: true, head_sampling_rate: 1, logs: { enabled: true, invocation_logs: false } },

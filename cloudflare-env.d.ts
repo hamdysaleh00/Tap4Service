@@ -1,6 +1,7 @@
 declare namespace Cloudflare {
   interface Env {
     DB?: D1Database;
+    ASSETS?: Fetcher;
     TAP2SERVE_STORAGE?: 'legacy' | 'normalized';
     TAP2SERVE_PRODUCTION?: string;
     TAP2SERVE_MAINTENANCE?: string;

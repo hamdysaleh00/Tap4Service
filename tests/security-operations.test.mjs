@@ -5,7 +5,13 @@ import { limitTraffic } from '../lib/abuse.mjs';
 import { requestEvent,secureResponse } from '../lib/observability.mjs';
 import { readiness,monitorHealth,productionConfigReady } from '../lib/operations.mjs';
 import { createInitialState,applyCommand,guestView,PERMISSIONS,bill } from '../lib/domain.mjs';
+import { verifyPassword } from '../lib/auth-crypto.mjs';
 const owner={id:'owner',email:'owner@example.test'},key=()=>crypto.randomUUID();
+test('password derivations bound per-isolate memory and shed excess concurrent login work',async()=>{
+ const attempts=await Promise.allSettled(Array.from({length:6},()=>verifyPassword('a deliberately wrong password',null)));
+ assert.equal(attempts.filter(result=>result.status==='fulfilled').length,2);for(const rejected of attempts.filter(result=>result.status==='rejected'))assert.equal(rejected.reason.status,503);
+ assert.equal(await verifyPassword('another wrong password',null),false);
+});
 test('streamed JSON is byte bounded and rejects malformed JSON, UTF-8, content types and prototype-shaped input',async()=>{
  const request=(value,headers={'content-type':'application/json'})=>new Request('https://olive.tap2serve.com/api/command',{method:'POST',headers,body:value});
  assert.deepEqual(await readJsonBody(request('{"ok":true}')),{ok:true});

@@ -1,0 +1,4409 @@
+[
+  {
+    "name": "app_state",
+    "sql": "CREATE TABLE `app_state` (\n\t`id` text PRIMARY KEY NOT NULL,\n\t`revision` integer DEFAULT 0 NOT NULL,\n\t`payload` text NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "payload",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_app_state_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "audit_events",
+    "sql": "CREATE TABLE audit_events (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  occurred_at TEXT,\n  actor TEXT,\n  action TEXT,\n  detail TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT audit_events_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT audit_events_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "occurred_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "actor",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "action",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "detail",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "audit_events_recent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "actor"
+          },
+          {
+            "seqno": 2,
+            "cid": 5,
+            "name": "occurred_at"
+          }
+        ],
+        "sql": "CREATE INDEX audit_events_recent ON audit_events (restaurant_id,actor,occurred_at)"
+      },
+      {
+        "seq": 1,
+        "name": "audit_events_history_position",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX audit_events_history_position ON audit_events (restaurant_id,position)"
+      },
+      {
+        "seq": 2,
+        "name": "sqlite_autoindex_audit_events_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_accounts",
+    "sql": "CREATE TABLE auth_accounts(\n user_id TEXT PRIMARY KEY REFERENCES users(id),\n email TEXT NOT NULL UNIQUE CHECK(email=lower(email)),\n display_name TEXT NOT NULL,\n password_hash TEXT,\n active INTEGER NOT NULL DEFAULT 1 CHECK(active IN(0,1)),\n is_super_admin INTEGER NOT NULL DEFAULT 0 CHECK(is_super_admin IN(0,1)),\n version INTEGER NOT NULL DEFAULT 1 CHECK(version>=1),\n email_verified_at INTEGER,\n mfa_secret_enc TEXT,\n mfa_last_step INTEGER NOT NULL DEFAULT -1,\n created_at INTEGER NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "user_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "email",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "display_name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "password_hash",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "active",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "is_super_admin",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "email_verified_at",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "mfa_secret_enc",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "mfa_last_step",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "-1",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "created_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "users",
+        "from": "user_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_auth_accounts_2",
+        "unique": 1,
+        "origin": "u",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 1,
+            "name": "email"
+          }
+        ],
+        "sql": null
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_auth_accounts_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "user_id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_action_tokens",
+    "sql": "CREATE TABLE auth_action_tokens(\n token_hash TEXT PRIMARY KEY,\n user_id TEXT NOT NULL REFERENCES auth_accounts(user_id),\n kind TEXT NOT NULL CHECK(kind IN('activate','reset')),\n account_version INTEGER NOT NULL,\n origin TEXT NOT NULL,\n expires_at INTEGER NOT NULL,\n used_at INTEGER,\n mfa_enrollment_enc TEXT,\n created_by TEXT,\n created_at INTEGER NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "token_hash",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "user_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "account_version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "origin",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "expires_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "used_at",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "mfa_enrollment_enc",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "created_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "created_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "auth_accounts",
+        "from": "user_id",
+        "to": "user_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "auth_action_tokens_user",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 1,
+            "name": "user_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "expires_at"
+          }
+        ],
+        "sql": "CREATE INDEX auth_action_tokens_user ON auth_action_tokens(user_id,expires_at)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_auth_action_tokens_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "token_hash"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_config",
+    "sql": "CREATE TABLE auth_config(id TEXT PRIMARY KEY CHECK(id='main'), ready INTEGER NOT NULL DEFAULT 0 CHECK(ready IN(0,1)), schema_version INTEGER NOT NULL DEFAULT 1)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "ready",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "schema_version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_auth_config_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_events",
+    "sql": "CREATE TABLE auth_events(id TEXT PRIMARY KEY,user_id TEXT,actor_id TEXT,event TEXT NOT NULL,at INTEGER NOT NULL)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "user_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "actor_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "event",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "auth_events_recent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 4,
+            "name": "at"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "user_id"
+          }
+        ],
+        "sql": "CREATE INDEX auth_events_recent ON auth_events(at,user_id)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_auth_events_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_guards",
+    "sql": "CREATE TABLE auth_guards(id TEXT PRIMARY KEY,valid INTEGER NOT NULL CONSTRAINT tap2serve_auth_conflict CHECK(valid=1))",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "valid",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_auth_guards_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_rate_buckets",
+    "sql": "CREATE TABLE auth_rate_buckets(bucket_key TEXT PRIMARY KEY,count INTEGER NOT NULL,expires_at INTEGER NOT NULL)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "bucket_key",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "expires_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "auth_rate_expiry",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 2,
+            "name": "expires_at"
+          }
+        ],
+        "sql": "CREATE INDEX auth_rate_expiry ON auth_rate_buckets(expires_at)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_auth_rate_buckets_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "bucket_key"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "auth_sessions",
+    "sql": "CREATE TABLE auth_sessions(\n token_hash TEXT PRIMARY KEY,\n user_id TEXT NOT NULL REFERENCES auth_accounts(user_id),\n account_version INTEGER NOT NULL,\n origin TEXT NOT NULL,\n created_at INTEGER NOT NULL,\n seen_at INTEGER NOT NULL,\n expires_at INTEGER NOT NULL,\n authenticated_at INTEGER NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "token_hash",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "user_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "account_version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "origin",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "created_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "seen_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "expires_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "authenticated_at",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "auth_accounts",
+        "from": "user_id",
+        "to": "user_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "auth_sessions_expiry",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 6,
+            "name": "expires_at"
+          }
+        ],
+        "sql": "CREATE INDEX auth_sessions_expiry ON auth_sessions(expires_at)"
+      },
+      {
+        "seq": 1,
+        "name": "auth_sessions_user",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 1,
+            "name": "user_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "expires_at"
+          }
+        ],
+        "sql": "CREATE INDEX auth_sessions_user ON auth_sessions(user_id,expires_at)"
+      },
+      {
+        "seq": 2,
+        "name": "sqlite_autoindex_auth_sessions_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "token_hash"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "bills",
+    "sql": "CREATE TABLE bills (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  session_id TEXT NOT NULL,\n  subtotal INTEGER NOT NULL,\n  service INTEGER NOT NULL,\n  tax INTEGER NOT NULL,\n  total INTEGER NOT NULL,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT bills_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT bills_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT bills_subtotal_check CHECK(subtotal >= 0),\n  CONSTRAINT bills_subtotal_integer CHECK(subtotal IS NULL OR (typeof(subtotal) = 'integer' AND abs(subtotal) <= 9007199254740991)),\n  CONSTRAINT bills_service_check CHECK(service >= 0),\n  CONSTRAINT bills_service_integer CHECK(service IS NULL OR (typeof(service) = 'integer' AND abs(service) <= 9007199254740991)),\n  CONSTRAINT bills_tax_check CHECK(tax >= 0),\n  CONSTRAINT bills_tax_integer CHECK(tax IS NULL OR (typeof(tax) = 'integer' AND abs(tax) <= 9007199254740991)),\n  CONSTRAINT bills_total_check CHECK(total >= 0),\n  CONSTRAINT bills_total_integer CHECK(total IS NULL OR (typeof(total) = 'integer' AND abs(total) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "subtotal",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "service",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "tax",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "total",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "sessions",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "bills_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX bills_parent ON bills (restaurant_id,session_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_bills_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "commit_guards",
+    "sql": "CREATE TABLE commit_guards (\n  id TEXT NOT NULL,\n  valid INTEGER NOT NULL,\n  PRIMARY KEY(id),\n  CONSTRAINT tap2serve_revision_conflict CHECK(valid = 1)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "valid",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_commit_guards_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "dining_tables",
+    "sql": "CREATE TABLE dining_tables (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  label TEXT NOT NULL,\n  zone TEXT,\n  capacity INTEGER,\n  token TEXT NOT NULL,\n  enabled INTEGER NOT NULL,\n  billable INTEGER NOT NULL,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT dining_tables_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT dining_tables_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT dining_tables_capacity_check CHECK(capacity BETWEEN 1 AND 30),\n  CONSTRAINT dining_tables_capacity_integer CHECK(capacity IS NULL OR (typeof(capacity) = 'integer' AND abs(capacity) <= 9007199254740991)),\n  CONSTRAINT dining_tables_enabled_check CHECK(enabled IN (0,1)),\n  CONSTRAINT dining_tables_enabled_integer CHECK(enabled IS NULL OR (typeof(enabled) = 'integer' AND abs(enabled) <= 9007199254740991)),\n  CONSTRAINT dining_tables_billable_check CHECK(billable IN (0,1)),\n  CONSTRAINT dining_tables_billable_integer CHECK(billable IS NULL OR (typeof(billable) = 'integer' AND abs(billable) <= 9007199254740991))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "label",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "zone",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "capacity",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "token",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "enabled",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "billable",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "dining_tables_label",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "label"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX dining_tables_label ON dining_tables (restaurant_id,label)"
+      },
+      {
+        "seq": 1,
+        "name": "dining_tables_token",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 8,
+            "name": "token"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX dining_tables_token ON dining_tables (token)"
+      },
+      {
+        "seq": 2,
+        "name": "sqlite_autoindex_dining_tables_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "feedback",
+    "sql": "CREATE TABLE feedback (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  session_id TEXT NOT NULL,\n  table_id TEXT NOT NULL,\n  idempotency_key TEXT,\n  rating INTEGER NOT NULL,\n  comment TEXT,\n  created_at TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT feedback_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT feedback_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT feedback_rating_check CHECK(rating BETWEEN 1 AND 5),\n  CONSTRAINT feedback_rating_integer CHECK(rating IS NULL OR (typeof(rating) = 'integer' AND abs(rating) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id),\n  FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "table_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "idempotency_key",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "rating",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "comment",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "dining_tables",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "dining_tables",
+        "from": "table_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "sessions",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 1,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 2,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "feedback_table",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "table_id"
+          }
+        ],
+        "sql": "CREATE INDEX feedback_table ON feedback (restaurant_id,table_id)"
+      },
+      {
+        "seq": 1,
+        "name": "feedback_key",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 7,
+            "name": "idempotency_key"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX feedback_key ON feedback (restaurant_id,session_id,idempotency_key)"
+      },
+      {
+        "seq": 2,
+        "name": "feedback_session",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          }
+        ],
+        "sql": "CREATE INDEX feedback_session ON feedback (restaurant_id,session_id)"
+      },
+      {
+        "seq": 3,
+        "name": "feedback_history_position",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX feedback_history_position ON feedback (restaurant_id,position)"
+      },
+      {
+        "seq": 4,
+        "name": "sqlite_autoindex_feedback_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "membership_permissions",
+    "sql": "CREATE TABLE membership_permissions (\n  restaurant_id TEXT NOT NULL,\n  membership_id TEXT NOT NULL,\n  position INTEGER NOT NULL,\n  permission TEXT NOT NULL,\n  PRIMARY KEY(restaurant_id,membership_id,position),\n  FOREIGN KEY(restaurant_id,membership_id) REFERENCES memberships(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "membership_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 3
+      },
+      {
+        "cid": 3,
+        "name": "permission",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "memberships",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "memberships",
+        "from": "membership_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_membership_permissions_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "membership_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "memberships",
+    "sql": "CREATE TABLE memberships (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  user_id TEXT,\n  email TEXT NOT NULL,\n  name TEXT,\n  active INTEGER NOT NULL,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT memberships_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT memberships_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT memberships_active_check CHECK(active IN (0,1)),\n  CONSTRAINT memberships_active_integer CHECK(active IS NULL OR (typeof(active) = 'integer' AND abs(active) <= 9007199254740991)),\n  FOREIGN KEY(user_id) REFERENCES users(id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "user_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "email",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "active",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "users",
+        "from": "user_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "memberships_invitation",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 6,
+            "name": "email"
+          },
+          {
+            "seqno": 1,
+            "cid": 8,
+            "name": "active"
+          },
+          {
+            "seqno": 2,
+            "cid": 5,
+            "name": "user_id"
+          }
+        ],
+        "sql": "CREATE INDEX memberships_invitation ON memberships (email,active,user_id)"
+      },
+      {
+        "seq": 1,
+        "name": "memberships_user",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 5,
+            "name": "user_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 8,
+            "name": "active"
+          },
+          {
+            "seqno": 2,
+            "cid": 0,
+            "name": "restaurant_id"
+          }
+        ],
+        "sql": "CREATE INDEX memberships_user ON memberships (user_id,active,restaurant_id)"
+      },
+      {
+        "seq": 2,
+        "name": "memberships_email",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "email"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX memberships_email ON memberships (restaurant_id,email)"
+      },
+      {
+        "seq": 3,
+        "name": "sqlite_autoindex_memberships_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "menu_categories",
+    "sql": "CREATE TABLE menu_categories (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  menu_id TEXT NOT NULL,\n  name TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT menu_categories_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT menu_categories_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  FOREIGN KEY(restaurant_id,menu_id) REFERENCES menus(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "menu_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "menus",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "menus",
+        "from": "menu_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "menu_categories_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "menu_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX menu_categories_parent ON menu_categories (restaurant_id,menu_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_menu_categories_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "menu_items",
+    "sql": "CREATE TABLE menu_items (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  menu_id TEXT NOT NULL,\n  name TEXT NOT NULL,\n  name_ar TEXT,\n  description TEXT,\n  description_ar TEXT,\n  price INTEGER NOT NULL,\n  category TEXT,\n  image TEXT,\n  available INTEGER NOT NULL,\n  visible INTEGER NOT NULL,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT menu_items_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT menu_items_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT menu_items_price_check CHECK(price >= 0),\n  CONSTRAINT menu_items_price_integer CHECK(price IS NULL OR (typeof(price) = 'integer' AND abs(price) <= 9007199254740991)),\n  CONSTRAINT menu_items_available_check CHECK(available IN (0,1)),\n  CONSTRAINT menu_items_available_integer CHECK(available IS NULL OR (typeof(available) = 'integer' AND abs(available) <= 9007199254740991)),\n  CONSTRAINT menu_items_visible_check CHECK(visible IN (0,1)),\n  CONSTRAINT menu_items_visible_integer CHECK(visible IS NULL OR (typeof(visible) = 'integer' AND abs(visible) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,menu_id) REFERENCES menus(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "menu_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "name_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "description",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "description_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "price",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "category",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "image",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "available",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "visible",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "menus",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "menus",
+        "from": "menu_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "menu_items_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "menu_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX menu_items_parent ON menu_items (restaurant_id,menu_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_menu_items_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "menu_modifiers",
+    "sql": "CREATE TABLE menu_modifiers (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  item_id TEXT NOT NULL,\n  name TEXT NOT NULL,\n  name_ar TEXT,\n  price INTEGER NOT NULL,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT menu_modifiers_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT menu_modifiers_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT menu_modifiers_price_check CHECK(price >= 0),\n  CONSTRAINT menu_modifiers_price_integer CHECK(price IS NULL OR (typeof(price) = 'integer' AND abs(price) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,item_id) REFERENCES menu_items(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "item_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "name_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "price",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "menu_items",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "menu_items",
+        "from": "item_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "menu_modifiers_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "item_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX menu_modifiers_parent ON menu_modifiers (restaurant_id,item_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_menu_modifiers_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "menus",
+    "sql": "CREATE TABLE menus (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT menus_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT menus_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_menus_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "migration_runs",
+    "sql": "CREATE TABLE migration_runs (\n  id TEXT NOT NULL,\n  source_revision INTEGER NOT NULL,\n  source_hash TEXT NOT NULL,\n  model_version INTEGER NOT NULL,\n  verified INTEGER NOT NULL DEFAULT 0,\n  PRIMARY KEY(id),\n  CONSTRAINT migration_verified CHECK(verified IN (0,1))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "source_revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "source_hash",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "model_version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "verified",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_migration_runs_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "order_item_modifiers",
+    "sql": "CREATE TABLE order_item_modifiers (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  order_item_id TEXT NOT NULL,\n  modifier_id TEXT,\n  name TEXT,\n  name_ar TEXT,\n  price INTEGER,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT order_item_modifiers_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT order_item_modifiers_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT order_item_modifiers_price_check CHECK(price >= 0),\n  CONSTRAINT order_item_modifiers_price_integer CHECK(price IS NULL OR (typeof(price) = 'integer' AND abs(price) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,order_item_id) REFERENCES order_items(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "order_item_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "modifier_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "name_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "price",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "order_items",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "order_items",
+        "from": "order_item_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "order_item_modifiers_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "order_item_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX order_item_modifiers_parent ON order_item_modifiers (restaurant_id,order_item_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_order_item_modifiers_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "order_items",
+    "sql": "CREATE TABLE order_items (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  order_id TEXT NOT NULL,\n  item_id TEXT NOT NULL,\n  name TEXT,\n  name_ar TEXT,\n  base_price INTEGER,\n  unit_price INTEGER NOT NULL,\n  quantity INTEGER NOT NULL,\n  notes TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT order_items_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT order_items_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT order_items_base_price_check CHECK(base_price >= 0),\n  CONSTRAINT order_items_base_price_integer CHECK(base_price IS NULL OR (typeof(base_price) = 'integer' AND abs(base_price) <= 9007199254740991)),\n  CONSTRAINT order_items_unit_price_check CHECK(unit_price >= 0),\n  CONSTRAINT order_items_unit_price_integer CHECK(unit_price IS NULL OR (typeof(unit_price) = 'integer' AND abs(unit_price) <= 9007199254740991)),\n  CONSTRAINT order_items_quantity_check CHECK(quantity BETWEEN 1 AND 30),\n  CONSTRAINT order_items_quantity_integer CHECK(quantity IS NULL OR (typeof(quantity) = 'integer' AND abs(quantity) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,order_id) REFERENCES orders(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "order_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "item_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "name_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "base_price",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "unit_price",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "quantity",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "notes",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "orders",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "orders",
+        "from": "order_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "order_items_parent",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "order_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX order_items_parent ON order_items (restaurant_id,order_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_order_items_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "orders",
+    "sql": "CREATE TABLE orders (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  session_id TEXT NOT NULL,\n  number INTEGER NOT NULL,\n  status TEXT NOT NULL,\n  version INTEGER NOT NULL,\n  created_at TEXT,\n  updated_at TEXT,\n  idempotency_key TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT orders_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT orders_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT orders_number_check CHECK(number >= 1),\n  CONSTRAINT orders_number_integer CHECK(number IS NULL OR (typeof(number) = 'integer' AND abs(number) <= 9007199254740991)),\n  CONSTRAINT orders_status_check CHECK(status IN ('PENDING','ACCEPTED','PREPARING','READY','SERVED')),\n  CONSTRAINT orders_version_check CHECK(version >= 1),\n  CONSTRAINT orders_version_integer CHECK(version IS NULL OR (typeof(version) = 'integer' AND abs(version) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "idempotency_key",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "sessions",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "orders_queue",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 7,
+            "name": "status"
+          },
+          {
+            "seqno": 2,
+            "cid": 9,
+            "name": "created_at"
+          }
+        ],
+        "sql": "CREATE INDEX orders_queue ON orders (restaurant_id,status,created_at)"
+      },
+      {
+        "seq": 1,
+        "name": "orders_number",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "number"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX orders_number ON orders (restaurant_id,number)"
+      },
+      {
+        "seq": 2,
+        "name": "orders_key",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 11,
+            "name": "idempotency_key"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX orders_key ON orders (restaurant_id,session_id,idempotency_key)"
+      },
+      {
+        "seq": 3,
+        "name": "orders_session",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX orders_session ON orders (restaurant_id,session_id,position)"
+      },
+      {
+        "seq": 4,
+        "name": "sqlite_autoindex_orders_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "payments",
+    "sql": "CREATE TABLE payments (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  session_id TEXT NOT NULL,\n  amount INTEGER NOT NULL,\n  method TEXT NOT NULL,\n  created_at TEXT,\n  recorded_by TEXT,\n  idempotency_key TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT payments_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT payments_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT payments_amount_check CHECK(amount >= 0),\n  CONSTRAINT payments_amount_integer CHECK(amount IS NULL OR (typeof(amount) = 'integer' AND abs(amount) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "amount",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "method",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "recorded_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "idempotency_key",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "sessions",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "payments_key",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 10,
+            "name": "idempotency_key"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX payments_key ON payments (restaurant_id,session_id,idempotency_key)"
+      },
+      {
+        "seq": 1,
+        "name": "payments_session",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          }
+        ],
+        "sql": "CREATE INDEX payments_session ON payments (restaurant_id,session_id)"
+      },
+      {
+        "seq": 2,
+        "name": "sqlite_autoindex_payments_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "platform_audit",
+    "sql": "CREATE TABLE platform_audit (\n  id TEXT NOT NULL,\n  restaurant_id TEXT NOT NULL,\n  position INTEGER NOT NULL,\n  event_json TEXT NOT NULL,\n  PRIMARY KEY(id),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT platform_audit_json CHECK(json_valid(event_json))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "event_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "platform_audit_tenant",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 1,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX platform_audit_tenant ON platform_audit (restaurant_id,position)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_platform_audit_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "platform_config",
+    "sql": "CREATE TABLE platform_config (\n  id TEXT NOT NULL,\n  owner_id TEXT NOT NULL,\n  metadata_json TEXT NOT NULL,\n  PRIMARY KEY(id),\n  FOREIGN KEY(owner_id) REFERENCES users(id),\n  CONSTRAINT platform_config_id CHECK(id = 'main'),\n  CONSTRAINT platform_config_json CHECK(json_valid(metadata_json))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "owner_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "metadata_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "users",
+        "from": "owner_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_platform_config_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "restaurant_setup",
+    "sql": "CREATE TABLE restaurant_setup (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  menu INTEGER,\n  stands INTEGER,\n  printer INTEGER,\n  training INTEGER,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT restaurant_setup_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT restaurant_setup_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT restaurant_setup_menu_check CHECK(menu IN (0,1)),\n  CONSTRAINT restaurant_setup_menu_integer CHECK(menu IS NULL OR (typeof(menu) = 'integer' AND abs(menu) <= 9007199254740991)),\n  CONSTRAINT restaurant_setup_stands_check CHECK(stands IN (0,1)),\n  CONSTRAINT restaurant_setup_stands_integer CHECK(stands IS NULL OR (typeof(stands) = 'integer' AND abs(stands) <= 9007199254740991)),\n  CONSTRAINT restaurant_setup_printer_check CHECK(printer IN (0,1)),\n  CONSTRAINT restaurant_setup_printer_integer CHECK(printer IS NULL OR (typeof(printer) = 'integer' AND abs(printer) <= 9007199254740991)),\n  CONSTRAINT restaurant_setup_training_check CHECK(training IN (0,1)),\n  CONSTRAINT restaurant_setup_training_integer CHECK(training IS NULL OR (typeof(training) = 'integer' AND abs(training) <= 9007199254740991))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "menu",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "stands",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "printer",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "training",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_restaurant_setup_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "restaurants",
+    "sql": "CREATE TABLE restaurants (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  revision INTEGER NOT NULL DEFAULT 0,\n  website_design_json TEXT,\n  slug TEXT NOT NULL,\n  name TEXT NOT NULL,\n  name_ar TEXT,\n  tagline TEXT,\n  tagline_ar TEXT,\n  category_names_json TEXT,\n  logo TEXT,\n  currency TEXT NOT NULL,\n  tax_bps INTEGER NOT NULL,\n  service_bps INTEGER NOT NULL,\n  support_status TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT restaurants_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT restaurants_present_json CHECK(json_valid(present_json)),\n  UNIQUE(id),\n  CONSTRAINT restaurants_identity CHECK(restaurant_id = id),\n  CONSTRAINT restaurants_website_design_json_json CHECK(website_design_json IS NULL OR json_valid(website_design_json)),\n  CONSTRAINT restaurants_slug_valid CHECK(length(slug) BETWEEN 1 AND 63 AND slug NOT GLOB '*[^a-z0-9-]*' AND substr(slug,1,1) <> '-' AND substr(slug,-1) <> '-' AND slug NOT LIKE 'xn--%' AND slug NOT IN ('admin','www','api','app','auth','static','assets','cdn','mail','smtp','ftp','status','support','help','docs','billing','dashboard','staging','stage','dev','test','localhost')),\n  CONSTRAINT restaurants_category_names_json_json CHECK(category_names_json IS NULL OR json_valid(category_names_json)),\n  CONSTRAINT restaurants_tax_bps_check CHECK(tax_bps >= 0),\n  CONSTRAINT restaurants_tax_bps_integer CHECK(tax_bps IS NULL OR (typeof(tax_bps) = 'integer' AND abs(tax_bps) <= 9007199254740991)),\n  CONSTRAINT restaurants_tax_bps_max CHECK(tax_bps <= 10000),\n  CONSTRAINT restaurants_service_bps_check CHECK(service_bps >= 0),\n  CONSTRAINT restaurants_service_bps_integer CHECK(service_bps IS NULL OR (typeof(service_bps) = 'integer' AND abs(service_bps) <= 9007199254740991)),\n  CONSTRAINT restaurants_service_bps_max CHECK(service_bps <= 10000)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "website_design_json",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "slug",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "name_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "tagline",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "tagline_ar",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "category_names_json",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "logo",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "currency",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "tax_bps",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "service_bps",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "support_status",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "restaurants_slug",
+        "unique": 1,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 7,
+            "name": "slug"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX restaurants_slug ON restaurants (slug)"
+      },
+      {
+        "seq": 1,
+        "name": "sqlite_autoindex_restaurants_2",
+        "unique": 1,
+        "origin": "u",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      },
+      {
+        "seq": 2,
+        "name": "sqlite_autoindex_restaurants_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "service_requests",
+    "sql": "CREATE TABLE service_requests (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  session_id TEXT NOT NULL,\n  table_id TEXT NOT NULL,\n  kind TEXT NOT NULL,\n  status TEXT NOT NULL,\n  created_at TEXT,\n  updated_at TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT service_requests_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT service_requests_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT service_requests_kind_check CHECK(kind IN ('bill','staff')),\n  CONSTRAINT service_requests_status_check CHECK(status IN ('pending','acknowledged','resolved')),\n  FOREIGN KEY(restaurant_id,session_id) REFERENCES sessions(restaurant_id,id),\n  FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "table_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "dining_tables",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "dining_tables",
+        "from": "table_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "sessions",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 1,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 2,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "service_requests_table",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 6,
+            "name": "table_id"
+          }
+        ],
+        "sql": "CREATE INDEX service_requests_table ON service_requests (restaurant_id,table_id)"
+      },
+      {
+        "seq": 1,
+        "name": "service_requests_outstanding",
+        "unique": 1,
+        "origin": "c",
+        "partial": 1,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          },
+          {
+            "seqno": 2,
+            "cid": 7,
+            "name": "kind"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX service_requests_outstanding ON service_requests (restaurant_id,session_id,kind) WHERE status <> 'resolved'"
+      },
+      {
+        "seq": 2,
+        "name": "service_requests_session",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "session_id"
+          }
+        ],
+        "sql": "CREATE INDEX service_requests_session ON service_requests (restaurant_id,session_id)"
+      },
+      {
+        "seq": 3,
+        "name": "service_requests_history_position",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX service_requests_history_position ON service_requests (restaurant_id,position)"
+      },
+      {
+        "seq": 4,
+        "name": "sqlite_autoindex_service_requests_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "sessions",
+    "sql": "CREATE TABLE sessions (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  table_id TEXT NOT NULL,\n  guest_name TEXT,\n  status TEXT NOT NULL,\n  version INTEGER NOT NULL,\n  capability TEXT,\n  opened_at TEXT NOT NULL,\n  opened_by TEXT,\n  tax_bps INTEGER NOT NULL,\n  service_bps INTEGER NOT NULL,\n  bill_requested_at TEXT,\n  finalized_at TEXT,\n  finalized_by TEXT,\n  finalized_from_version INTEGER,\n  released_at TEXT,\n  released_by TEXT,\n  release_reason TEXT,\n  closed_at TEXT,\n  closed_by TEXT,\n  reopened_at TEXT,\n  reopened_by TEXT,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT sessions_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT sessions_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT sessions_status_check CHECK(status IN ('OPEN','BILL_REQUESTED','FINALIZED')),\n  CONSTRAINT sessions_version_check CHECK(version >= 1),\n  CONSTRAINT sessions_version_integer CHECK(version IS NULL OR (typeof(version) = 'integer' AND abs(version) <= 9007199254740991)),\n  CONSTRAINT sessions_tax_bps_check CHECK(tax_bps >= 0),\n  CONSTRAINT sessions_tax_bps_integer CHECK(tax_bps IS NULL OR (typeof(tax_bps) = 'integer' AND abs(tax_bps) <= 9007199254740991)),\n  CONSTRAINT sessions_tax_bps_max CHECK(tax_bps <= 10000),\n  CONSTRAINT sessions_service_bps_check CHECK(service_bps >= 0),\n  CONSTRAINT sessions_service_bps_integer CHECK(service_bps IS NULL OR (typeof(service_bps) = 'integer' AND abs(service_bps) <= 9007199254740991)),\n  CONSTRAINT sessions_service_bps_max CHECK(service_bps <= 10000),\n  CONSTRAINT sessions_finalized_from_version_integer CHECK(finalized_from_version IS NULL OR (typeof(finalized_from_version) = 'integer' AND abs(finalized_from_version) <= 9007199254740991)),\n  FOREIGN KEY(restaurant_id,table_id) REFERENCES dining_tables(restaurant_id,id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "table_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "guest_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "capability",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "opened_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "opened_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "tax_bps",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "service_bps",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "bill_requested_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "finalized_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "finalized_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "finalized_from_version",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "released_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 19,
+        "name": "released_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 20,
+        "name": "release_reason",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 21,
+        "name": "closed_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 22,
+        "name": "closed_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 23,
+        "name": "reopened_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 24,
+        "name": "reopened_by",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "dining_tables",
+        "from": "restaurant_id",
+        "to": "restaurant_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "dining_tables",
+        "from": "table_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sessions_status",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 7,
+            "name": "status"
+          },
+          {
+            "seqno": 2,
+            "cid": 10,
+            "name": "opened_at"
+          }
+        ],
+        "sql": "CREATE INDEX sessions_status ON sessions (restaurant_id,status,opened_at)"
+      },
+      {
+        "seq": 1,
+        "name": "sessions_occupancy",
+        "unique": 1,
+        "origin": "c",
+        "partial": 1,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 5,
+            "name": "table_id"
+          }
+        ],
+        "sql": "CREATE UNIQUE INDEX sessions_occupancy ON sessions (restaurant_id,table_id) WHERE released_at IS NULL"
+      },
+      {
+        "seq": 2,
+        "name": "sessions_sync_open_bill",
+        "unique": 0,
+        "origin": "c",
+        "partial": 1,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": "CREATE INDEX sessions_sync_open_bill ON sessions (restaurant_id,id) WHERE status='FINALIZED' AND closed_at IS NULL"
+      },
+      {
+        "seq": 3,
+        "name": "sessions_sync_occupied",
+        "unique": 0,
+        "origin": "c",
+        "partial": 1,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": "CREATE INDEX sessions_sync_occupied ON sessions (restaurant_id,id) WHERE released_at IS NULL"
+      },
+      {
+        "seq": 4,
+        "name": "sessions_history_position",
+        "unique": 0,
+        "origin": "c",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 2,
+            "name": "position"
+          }
+        ],
+        "sql": "CREATE INDEX sessions_history_position ON sessions (restaurant_id,position)"
+      },
+      {
+        "seq": 5,
+        "name": "sqlite_autoindex_sessions_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "subscriptions",
+    "sql": "CREATE TABLE subscriptions (\n  restaurant_id TEXT NOT NULL,\n  id TEXT NOT NULL,\n  position INTEGER NOT NULL DEFAULT 0,\n  extra_json TEXT NOT NULL DEFAULT '{}',\n  present_json TEXT NOT NULL DEFAULT '[]',\n  status TEXT,\n  monthly_per_table INTEGER,\n  setup_fee INTEGER,\n  PRIMARY KEY(restaurant_id,id),\n  CONSTRAINT subscriptions_extra_json CHECK(json_valid(extra_json)),\n  CONSTRAINT subscriptions_present_json CHECK(json_valid(present_json)),\n  FOREIGN KEY(restaurant_id) REFERENCES restaurants(id),\n  CONSTRAINT subscriptions_monthly_per_table_check CHECK(monthly_per_table >= 0),\n  CONSTRAINT subscriptions_monthly_per_table_integer CHECK(monthly_per_table IS NULL OR (typeof(monthly_per_table) = 'integer' AND abs(monthly_per_table) <= 9007199254740991)),\n  CONSTRAINT subscriptions_setup_fee_check CHECK(setup_fee >= 0),\n  CONSTRAINT subscriptions_setup_fee_integer CHECK(setup_fee IS NULL OR (typeof(setup_fee) = 'integer' AND abs(setup_fee) <= 9007199254740991))\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "restaurant_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "position",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "extra_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "present_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "monthly_per_table",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "setup_fee",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "restaurants",
+        "from": "restaurant_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_subscriptions_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "restaurant_id"
+          },
+          {
+            "seqno": 1,
+            "cid": 1,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  },
+  {
+    "name": "users",
+    "sql": "CREATE TABLE users (\n  id TEXT NOT NULL,\n  PRIMARY KEY(id)\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      }
+    ],
+    "foreignKeys": [],
+    "indexes": [
+      {
+        "seq": 0,
+        "name": "sqlite_autoindex_users_1",
+        "unique": 1,
+        "origin": "pk",
+        "partial": 0,
+        "columns": [
+          {
+            "seqno": 0,
+            "cid": 0,
+            "name": "id"
+          }
+        ],
+        "sql": null
+      }
+    ]
+  }
+]

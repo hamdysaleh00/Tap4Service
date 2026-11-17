@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-11-17T02:27:17.761Z",
+  "results": [
+    {
+      "name": "api-integration",
+      "command": [
+        "node",
+        "tests/api.integration.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1496
+    },
+    {
+      "name": "lifecycle-integration",
+      "command": [
+        "node",
+        "tests/session-lifecycle.integration.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 1409
+    },
+    {
+      "name": "ui.local",
+      "command": [
+        "node",
+        "tests/ui.local.mjs"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 55
+    },
+    {
+      "name": "alpha.ui.local",
+      "command": [
+        "node",
+        "tests/alpha.ui.local.mjs"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 60
+    },
+    {
+      "name": "split-bill.ui.local",
+      "command": [
+        "node",
+        "tests/split-bill.ui.local.mjs"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 64
+    },
+    {
+      "name": "session-lifecycle.ui.local",
+      "command": [
+        "node",
+        "tests/session-lifecycle.ui.local.mjs"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 62
+    }
+  ]
+}

@@ -6,6 +6,8 @@ const required={restaurants:['slug','name','currency','tax_bps','service_bps'],m
 const camel=s=>s.replace(/_([a-z])/g,(_,c)=>c.toUpperCase());
 function indexes(table){
  const out=[],add=(suffix,columns,unique=false,where='')=>out.push({name:table+'_'+suffix,columns,unique,where});
+ if(['sessions','feedback','service_requests','audit_events'].includes(table))add('history_position',['restaurant_id','position']);
+ if(table==='sessions'){add('sync_occupied',['restaurant_id','id'],false,'released_at IS NULL');add('sync_open_bill',['restaurant_id','id'],false,"status='FINALIZED' AND closed_at IS NULL");}
  if(table==='restaurants')add('slug',['slug'],true);
  if(parentColumns[table])add('parent',['restaurant_id',parentColumns[table],'position']);
  if(table==='memberships'){add('email',['restaurant_id','email'],true);add('user',['user_id','active','restaurant_id']);add('invitation',['email','active','user_id']);}

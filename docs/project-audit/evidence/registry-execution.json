@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-11-17T02:26:43.772Z",
+  "results": [
+    {
+      "name": "dependency-audit",
+      "command": [
+        "node",
+        "<installed-npm-cli>",
+        "audit",
+        "--json"
+      ],
+      "exitCode": 1,
+      "elapsedMs": 74973
+    },
+    {
+      "name": "dependency-signatures",
+      "command": [
+        "node",
+        "<installed-npm-cli>",
+        "audit",
+        "signatures"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 44237
+    }
+  ]
+}
