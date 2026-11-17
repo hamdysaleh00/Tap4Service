@@ -247,3 +247,14 @@ not Worker CPU measurements. Full assertions/source are in the named suite.
 | Actual test name | Status | Wall duration |
 | --- | --- | --- |
 | strict staging: two independent restaurants authenticate, order, bill and revoke sessions without Sites | PASS | 5380.7216 ms |
+
+## Verified synchronization outcome
+
+Local audit commit 986ea4c7a9235d12234dfc1e104983b367b6b082 was created after
+a per-command author-identity correction. CLI push was BLOCKED by unavailable
+HTTPS credentials/TTY. Connected GitHub upload then succeeded as
+fdc4410d968c2469f0971ac8ed7dc12cb97d90a2 on codex/project-audit-2026-11-17.
+Public Git fetch and exact tree/file comparison passed: both trees are
+f5556ca0a94327bd6bc478f413c717576fcdb550. No force update, main overwrite or
+production deployment occurred. See [the receipt](SYNCHRONIZATION.md) for file
+inventory and finalization details.

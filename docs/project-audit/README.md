@@ -40,3 +40,9 @@ GitHub target: [hamdysaleh00/tab2serve](https://github.com/hamdysaleh00/tab2serv
 existing branch `main`. Commit/push verification is recorded after the audit
 payload is committed; see the synchronization receipt and final delivery message.
 The reports cannot embed the hash of a commit containing their own final bytes.
+
+## Verified source upload
+
+The [synchronization receipt](SYNCHRONIZATION.md) records the successful exact-tree
+upload to `codex/project-audit-2026-11-17` after Git CLI authentication failed.
+GitHub main was left unchanged; review/merge is the remaining integration step.
